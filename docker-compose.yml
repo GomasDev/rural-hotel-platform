@@ -33,11 +33,19 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  frontend:
+    build: ./frontend
+    container_name: ruralhot-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: ruralhot-pgadmin
     restart: always
-    profiles: ["dev"]  #solo se levanta con docker-compose --profile dev
+    profiles: ["dev"]
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
