@@ -1,4 +1,5 @@
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 export declare class AuthController {
     private authService;
@@ -12,6 +13,14 @@ export declare class AuthController {
             name: string;
             last_name1: string;
             last_name2: string;
+        };
+    }>;
+    login(loginDto: LoginDto): Promise<{
+        access_token: string;
+        user: {
+            id: string;
+            email: string;
+            role: string;
         };
     }>;
 }

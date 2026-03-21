@@ -44,12 +44,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const users_service_1 = require("../users/users.service");
+const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
+const users_service_1 = require("../users/users.service");
 let AuthService = class AuthService {
     usersService;
-    constructor(usersService) {
+    jwtService;
+    constructor(usersService, jwtService) {
         this.usersService = usersService;
+        this.jwtService = jwtService;
     }
     async register(registerDto) {
         const { name, lastName1, lastName2, email, password, role } = registerDto;
@@ -79,10 +82,23 @@ let AuthService = class AuthService {
             }
         };
     }
+    async login(loginDto) {
+        const user = await this.usersService.findByEmail(loginDto.email);
+        if (!user)
+            throw new common_1.UnauthorizedException('Credenciales incorrectas');
+        const valid = await bcrypt.compare(loginDto.password, user.passwordHash);
+        if (!valid)
+            throw new common_1.UnauthorizedException('Credenciales incorrectas');
+        const payload = { sub: user.id, email: user.email, role: user.role };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: { id: user.id, email: user.email, role: user.role }
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService, jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

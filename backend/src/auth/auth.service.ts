@@ -1,14 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { RegisterDto } from './dto/register.dto';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from '../users/users.service';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 
-//POST /auth/register
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService) {}
-
+    constructor(private usersService: UsersService, private readonly jwtService: JwtService) {}
+    
+    //POST /auth/register
     async register(registerDto: RegisterDto) {
         const { name, lastName1, lastName2, email, password, role } = registerDto;
         
@@ -44,4 +46,20 @@ export class AuthService {
             }
         };
     }    
+
+    //POST /auth/login
+    async login(loginDto: LoginDto) {
+        const user = await this.usersService.findByEmail(loginDto.email);
+        if (!user) throw new UnauthorizedException('Credenciales incorrectas');
+
+        const valid = await bcrypt.compare(loginDto.password, user.passwordHash);
+        if (!valid) throw new UnauthorizedException('Credenciales incorrectas');
+
+        const payload = { sub: user.id, email: user.email, role: user.role };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: { id: user.id, email: user.email, role: user.role }
+        };
+    }
+
 }

@@ -1,5 +1,4 @@
-// src/auth/dto/register.dto.ts
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 import type { UserRole } from '../../database/types';
 
 export class RegisterDto {
