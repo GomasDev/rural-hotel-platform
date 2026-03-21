@@ -1,0 +1,31 @@
+# === NODE MODULES (todos) ===
+node_modules/
+**/node_modules/    #cubre backend/ + frontend/
+
+# === ENVIRONMENT ===
+.env
+.env.local
+**/.env
+**/.env.local
+
+# === BUILD OUTPUTS ===
+dist/
+build/
+**/dist/
+**/build/
+
+# === TypeORM ===
+src/migrations/*.js
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === LOGS ===
+*.log
+npm-debug.log*
