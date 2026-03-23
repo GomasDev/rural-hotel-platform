@@ -1,21 +1,25 @@
+import { BrowserRouter, Route } from 'react-router-dom'
+import { Routes } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
+import Login from './pages/Login'
+import Register from './pages/Register'
 import './App.css'
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-green-500 mb-4">
-          🏨 RuralHot
-        </h1>
-        <p className="text-gray-400 text-lg">
-          Plataforma de hoteles rurales
-        </p>
-        <span className="mt-6 inline-block bg-green-600 text-white px-4 py-2 rounded-lg">
-          ✅ S1-03 React + Tailwind OK
-        </span>
-      </div>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage/>} />
+        <Route path="/login" element={<Login/>} />
+        <Route path="/register" element={<Register/>} />
+        <Route path="/dashboard" element={
+            <div className="p-8 text-center text-2xl">
+              ✅ ¡Bienvenido! Dashboard — Sprint 2
+            </div>
+          } />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App

@@ -39,7 +39,11 @@ __decorate([
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.MinLength)(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
+    (0, class_validator_1.Matches)(/(?=.*[a-z])/, { message: 'Debe contener al menos una minúscula' }),
+    (0, class_validator_1.Matches)(/(?=.*[A-Z])/, { message: 'Debe contener al menos una mayúscula' }),
+    (0, class_validator_1.Matches)(/(?=.*\d)/, { message: 'Debe contener al menos un número' }),
+    (0, class_validator_1.Matches)(/(?=.*[@$!%*?&._-])/, { message: 'Debe contener al menos un carácter especial (@$!%*?&._-)' }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 __decorate([

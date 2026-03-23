@@ -30,7 +30,9 @@ let UsersService = class UsersService {
         return this.usersRepository.save(user);
     }
     async findAll() {
-        return this.usersRepository.find();
+        return this.usersRepository.find({
+            select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role']
+        });
     }
 };
 exports.UsersService = UsersService;

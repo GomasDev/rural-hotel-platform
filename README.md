@@ -142,3 +142,8 @@ npm run start:dev
 
 - GitHub: `https://github.com/GomasDev/rural-hotel-platform`
 - Autor: Rafael Ballesteros Padial
+
+
+docker exec ruralhot-backend npm run test:e2e -- --verbose
+
+test

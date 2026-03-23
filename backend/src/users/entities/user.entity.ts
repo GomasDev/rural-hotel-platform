@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export type UserRole = 'super_admin' | 'admin' | 'client';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -20,6 +22,14 @@ export class User {
   @Column({name: 'password_hash'})
   passwordHash: string;
 
-  @Column({ default: 'user' })
-  role: string;
+  @Column({
+    type: 'enum',
+    enum: ['super_admin', 'admin', 'client'],
+    default: 'client',
+  })
+  role: UserRole;
+
+
+
+  
 }

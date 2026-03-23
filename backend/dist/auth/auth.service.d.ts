@@ -22,7 +22,7 @@ export declare class AuthService {
         user: {
             id: string;
             email: string;
-            role: string;
+            role: import("../users/entities/user.entity").UserRole;
         };
     }>;
 }

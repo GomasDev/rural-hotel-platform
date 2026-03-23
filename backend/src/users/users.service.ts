@@ -20,6 +20,8 @@ export class UsersService {
     }
 
     async findAll() {
-        return this.usersRepository.find();
+        return this.usersRepository.find({
+            select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role'] // Excluye password
+        });
     }
 }
