@@ -12,13 +12,14 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - DATABASE_USER=ruralhot
-      - DATABASE_PASSWORD=ruralhot
-      - DATABASE_NAME=ruralhot
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USERNAME=ruralhot
+      - DB_PASSWORD=ruralhot
+      - DB_NAME=ruralhot
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgis/postgis:16-3.4-alpine
@@ -32,6 +33,11 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ruralhot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build: ./frontend

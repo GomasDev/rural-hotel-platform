@@ -35,7 +35,7 @@ exports.AppModule = AppModule = __decorate([
                     entities: [__dirname + '/**/*.entity{.ts,.js}'],
                     synchronize: true,
                     migrations: ['src/migrations/*.ts'],
-                    migrationsRun: true,
+                    migrationsRun: false,
                 }),
                 inject: [config_1.ConfigService],
             }),

@@ -23,7 +23,7 @@ import { UsersModule } from './users/users.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
       migrations: ['src/migrations/*.ts'], 
-      migrationsRun: true,
+      migrationsRun: false,
     }),
     inject: [ConfigService],
   }),

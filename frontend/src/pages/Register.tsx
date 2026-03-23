@@ -51,8 +51,8 @@ export default function Register() {
       <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
 
         {/* Header */}
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Crear cuenta</h2>
-        <p className="text-gray-400 mb-6 text-sm">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Crear cuenta</h2>
+        <p className="text-gray-400 mb-6 text-sm text-center">
           ¿Ya tienes cuenta?{' '}
           <Link to="/login" className="text-green-700 hover:underline">
             Inicia sesión
@@ -61,7 +61,7 @@ export default function Register() {
         <p className="text-gray-400 mb-6 text-sm">
           <button
             onClick={() => navigate('/')}
-            className="text-green-700 hover:underline"
+            className="text-green-700 hover:underline mx-auto block"
           >
           Inicio
           </button>

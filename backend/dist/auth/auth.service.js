@@ -47,12 +47,16 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const users_service_1 = require("../users/users.service");
+const crypto_1 = require("crypto");
+const mail_service_1 = require("../mail/mail.service");
 let AuthService = class AuthService {
     usersService;
     jwtService;
-    constructor(usersService, jwtService) {
+    mailService;
+    constructor(usersService, jwtService, mailService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.mailService = mailService;
     }
     async register(registerDto) {
         const { name, lastName1, lastName2, email, password, role } = registerDto;
@@ -95,10 +99,33 @@ let AuthService = class AuthService {
             user: { id: user.id, email: user.email, role: user.role }
         };
     }
+    async forgotPassword(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user)
+            return;
+        const token = (0, crypto_1.randomBytes)(32).toString('hex');
+        const expires = new Date();
+        expires.setHours(expires.getHours() + 1);
+        await this.usersService.updateResetToken(user.id, token, expires);
+        await this.mailService.sendPasswordReset(email, token);
+    }
+    async resetPassword(token, newPassword) {
+        const user = await this.usersService.findByResetToken(token);
+        if (!user) {
+            throw new common_1.BadRequestException('Token inválido');
+        }
+        if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new common_1.BadRequestException('El token ha expirado');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await this.usersService.updatePassword(user.id, hashedPassword);
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [users_service_1.UsersService, jwt_1.JwtService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        jwt_1.JwtService,
+        mail_service_1.MailService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

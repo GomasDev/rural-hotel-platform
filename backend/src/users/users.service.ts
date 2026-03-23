@@ -24,4 +24,28 @@ export class UsersService {
             select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role'] // Excluye password
         });
     }
+
+    // Guarda el token de reset
+    async updateResetToken(id: string, token: string, expires: Date): Promise<void> {
+    await this.usersRepository.update(id, {
+        resetPasswordToken: token,
+        resetPasswordExpires: expires,
+    });
+    }
+
+    // Busca usuario por token de reset
+    async findByResetToken(token: string) {
+    return this.usersRepository.findOne({
+        where: { resetPasswordToken: token },
+    });
+    }
+
+    // Actualiza password y limpia token
+    async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await this.usersRepository.update(id, {
+        passwordHash: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+    });
+    }
 }

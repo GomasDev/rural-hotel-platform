@@ -34,6 +34,24 @@ let UsersService = class UsersService {
             select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role']
         });
     }
+    async updateResetToken(id, token, expires) {
+        await this.usersRepository.update(id, {
+            resetPasswordToken: token,
+            resetPasswordExpires: expires,
+        });
+    }
+    async findByResetToken(token) {
+        return this.usersRepository.findOne({
+            where: { resetPasswordToken: token },
+        });
+    }
+    async updatePassword(id, hashedPassword) {
+        await this.usersRepository.update(id, {
+            passwordHash: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null,
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

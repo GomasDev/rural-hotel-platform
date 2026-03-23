@@ -6,12 +6,13 @@ import { MailService } from './mail.service';
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.MAIL_HOST || 'mailpit',
-        port: Number(process.env.MAIL_PORT) || 1025,
-        auth: process.env.MAIL_USER ? {
-          user: process.env.MAIL_USER,
-          pass: process.env.MAIL_PASS,
-        } : undefined, // ← Mailpit no necesita auth
+        host: process.env.EMAIL_SMTP_HOST || 'mailpit',
+        port: Number(process.env.EMAIL_SMTP_PORT) || 1025,
+        secure: process.env.EMAIL_SMTP_SECURE === 'true', // ← false para Mailpit
+        auth: process.env.EMAIL_SMTP_USER ? {
+          user: process.env.EMAIL_SMTP_USER,
+          pass: process.env.EMAIL_SMTP_PASSWORD,
+        } : undefined,
       },
       defaults: {
         from: process.env.MAIL_FROM || 'noreply@ruralhot.com',

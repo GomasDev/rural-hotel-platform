@@ -29,7 +29,10 @@ export class User {
   })
   role: UserRole;
 
+  @Column({ name: 'reset_password_token', type: 'varchar', nullable: true, default: null })
+  resetPasswordToken: string | null;
 
+  @Column({ name: 'reset_password_expires', type: 'timestamp', nullable: true, default: null })
+  resetPasswordExpires: Date | null;
 
-  
 }

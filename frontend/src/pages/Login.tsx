@@ -50,21 +50,18 @@ export default function Login() {
       <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
 
         {/* Header */}
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Iniciar sesión</h2>
-        <p className="text-gray-400 mb-6 text-sm">
-          ¿No tienes cuenta?{' '}
-          <Link to="/register" className="text-green-700 hover:underline">
-            Regístrate
-          </Link>
-        </p>
-        <p className="text-gray-400 mb-6 text-sm">
-          <button
-            onClick={() => navigate('/')}
-            className="text-green-700 hover:underline"
-          >
-            Volver
-          </button>
-        </p>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Iniciar sesión</h2>
+        <p className="text-gray-400 mb-4 text-sm text-center">
+            ¿No tienes cuenta?{' '}
+            <Link to="/register" className="text-green-700 hover:underline">
+              Regístrate
+            </Link>
+          </p>
+
+        <button onClick={() => navigate('/')} className="text-green-700 hover:underline bg-transparent border-none p-0 text-sm mx-auto block mb-4">
+          Inicio
+        </button>
+        
 
         {/* Error */}
         {error && (
@@ -102,6 +99,12 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Iniciar sesión'}
           </button>
         </form>
+
+        <p className="text-gray-400 text-sm mt-4 text-center">
+          <Link to="/forgot-password" className="text-green-700 hover:underline text-center">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </p>
 
       </div>
     </div>
