@@ -36,7 +36,7 @@ export default function Login() {
       // ✅ Guarda el token en localStorage
       localStorage.setItem('access_token', data.access_token);
 
-      navigate('/dashboard'); // → Sprint 2
+      navigate('/dashboard');
     } catch {
       setError('No se pudo conectar con el servidor');
     } finally {
