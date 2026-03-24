@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { HotelsModule } from './hotels/hotels.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -28,7 +30,9 @@ import { UsersModule } from './users/users.module';
     inject: [ConfigService],
   }),
   AuthModule,
-  UsersModule
+  UsersModule,
+  HotelsModule,
+  RoomsModule
 ],
   controllers: [AppController],
   providers: [AppService],

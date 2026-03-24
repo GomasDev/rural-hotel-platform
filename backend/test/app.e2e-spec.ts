@@ -265,4 +265,103 @@ it('Register → Forgot → Reset → Login exitoso', async () => {
 
   expect(login.body).toHaveProperty('access_token');
 });
+
+// ─────────────────────────────────────────────
+  // HOTELES & HABITACIONES (RBAC & Relaciones)
+  // ─────────────────────────────────────────────
+
+  let adminToken: string;
+  let clientToken: string;
+  let createdHotelId: string;
+
+  // Setup de tokens para los tests de negocio
+  beforeAll(async () => {
+    // Registrar y loguear un Admin
+    await request(app.getHttpServer()).post('/auth/register').send({
+      name: 'Admin', lastName1: 'Hotel', email: 'admin_hotel@test.com', password: 'Password123!', role: 'super_admin'
+    });
+    const loginAdmin = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'admin_hotel@test.com', password: 'Password123!'
+    });
+    adminToken = loginAdmin.body.access_token;
+
+    // Registrar y loguear un Cliente
+    await request(app.getHttpServer()).post('/auth/register').send({
+      name: 'Client', lastName1: 'Hotel', email: 'client_hotel@test.com', password: 'Password123!', role: 'client'
+    });
+    const loginClient = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'client_hotel@test.com', password: 'Password123!'
+    });
+    clientToken = loginClient.body.access_token;
+  });
+
+  it('POST /hotels → 403 Forbidden si el usuario es "client"', async () => {
+    return request(app.getHttpServer())
+      .post('/hotels')
+      .set('Authorization', `Bearer ${clientToken}`)
+      .send({
+        name: 'Hotel Prohibido',
+        address: 'Calle Falsa 123',
+        location: '0,0',
+        phone: '123',
+        email: 'bad@hotel.com'
+      })
+      .expect(403);
+  });
+
+  it('POST /hotels → 201 Created si el usuario es "super_admin"', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/hotels')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: 'Gran Hotel Test',
+        description: 'Descripción de prueba',
+        address: 'Sierra Norte, Madrid',
+        location: '40.41, -3.70',
+        phone: '911223344',
+        email: 'granhotel@test.com',
+        ownerId: 'b8732a73-fb60-4073-bdc7-42435f18a310', // Usa un UUID válido de tu DB
+        images: [],
+        isActive: true
+      })
+      .expect(201);
+
+    createdHotelId = response.body.id; // Guardamos el ID para el test de habitaciones
+    expect(createdHotelId).toBeDefined();
+  });
+
+  it('POST /rooms → 201 Created vinculado al hotel anterior', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/rooms')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        hotelId: createdHotelId,
+        name: 'Habitación Suite 101',
+        description: 'Suite de lujo para tests',
+        capacity: 2,
+        pricePerNight: 150.00,
+        images: [],
+        isAvailable: true
+      })
+      .expect(201);
+
+    expect(response.body.hotelId).toBe(createdHotelId);
+  });
+
+  it('DELETE /hotels/:id → Borrado en cascada de habitaciones', async () => {
+    // 1. Borramos el hotel
+    await request(app.getHttpServer())
+      .delete(`/hotels/${createdHotelId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    // 2. Verificamos en DB que la habitación ha desaparecido (Cascade)
+    const roomCount = await dataSource.query(
+      `SELECT COUNT(*) FROM rooms WHERE hotel_id = $1`,
+      [createdHotelId]
+    );
+    expect(parseInt(roomCount[0].count)).toBe(0);
+  });
+
+  
 });

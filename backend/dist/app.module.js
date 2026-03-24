@@ -14,6 +14,8 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
+const rooms_module_1 = require("./rooms/rooms.module");
+const hotels_module_1 = require("./hotels/hotels.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,7 +42,9 @@ exports.AppModule = AppModule = __decorate([
                 inject: [config_1.ConfigService],
             }),
             auth_module_1.AuthModule,
-            users_module_1.UsersModule],
+            users_module_1.UsersModule,
+            hotels_module_1.HotelsModule,
+            rooms_module_1.RoomsModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })
