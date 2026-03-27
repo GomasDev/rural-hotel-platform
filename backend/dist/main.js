@@ -6,9 +6,14 @@ const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: '*',
+        origin: [
+            'https://opulent-orbit-6q4pq576jj9cjq6-5173.app.github.dev',
+            'http://localhost:5173',
+        ],
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
     });
-    app.enableCors({ origin: '*' });
     app.useGlobalPipes(new common_1.ValidationPipe());
     await app.listen(process.env.PORT ?? 3000);
 }

@@ -5,12 +5,16 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS ← permite peticiones del frontend
+  // CORS único y completo
   app.enableCors({
-    origin: '*', // en producción → URL exacta del frontend
+    origin: [
+      'https://opulent-orbit-6q4pq576jj9cjq6-5173.app.github.dev',
+      'http://localhost:5173',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
-
-  app.enableCors({ origin: '*' });
 
   app.useGlobalPipes(new ValidationPipe());
 
