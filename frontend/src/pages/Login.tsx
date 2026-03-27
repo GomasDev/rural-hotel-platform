@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { checkAuth } = useAuth(); // ← Para actualizar contexto
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -33,10 +36,16 @@ export default function Login() {
         return;
       }
 
-      // ✅ Guarda el token en localStorage
-      localStorage.setItem('access_token', data.access_token);
+      // ✅ Guarda el token
 
-      navigate('/dashboard');
+      
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // ✅ Actualiza contexto + navega SIN recarga
+      checkAuth();
+      navigate('/dashboard', { replace: true });
+      
     } catch {
       setError('No se pudo conectar con el servidor');
     } finally {
@@ -44,24 +53,23 @@ export default function Login() {
     }
   };
 
+
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-
       <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
-
         {/* Header */}
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Iniciar sesión</h2>
         <p className="text-gray-400 mb-4 text-sm text-center">
-            ¿No tienes cuenta?{' '}
-            <Link to="/register" className="text-green-700 hover:underline">
-              Regístrate
-            </Link>
-          </p>
+          ¿No tienes cuenta?{' '}
+          <Link to="/register" className="text-green-700 hover:underline">
+            Regístrate
+          </Link>
+        </p>
 
         <button onClick={() => navigate('/')} className="text-green-700 hover:underline bg-transparent border-none p-0 text-sm mx-auto block mb-4">
           Inicio
         </button>
-        
 
         {/* Error */}
         {error && (
@@ -101,11 +109,10 @@ export default function Login() {
         </form>
 
         <p className="text-gray-400 text-sm mt-4 text-center">
-          <Link to="/forgot-password" className="text-green-700 hover:underline text-center">
+          <Link to="/forgot-password" className="text-green-700 hover:underline">
             ¿Olvidaste tu contraseña?
           </Link>
         </p>
-
       </div>
     </div>
   );
