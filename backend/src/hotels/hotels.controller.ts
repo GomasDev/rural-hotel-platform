@@ -18,6 +18,8 @@ export class HotelsController {
     @Query('page')   page   = '1',
     @Query('limit')  limit  = '9',
     @Query('search') search = '',
+    @Query('sortBy') sortBy = 'createdAt',
+    @Query('order')  order  = 'DESC',      
   ) {
     return this.hotelsService.findAll({
       page: parseInt(page),

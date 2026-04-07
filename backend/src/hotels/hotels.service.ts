@@ -16,7 +16,6 @@ export class HotelsService {
     const { location, ...rest } = dto;
     const [lng, lat] = location.split(',').map(Number);
 
-    //QueryBuilder para PostGIS (create() no acepta funciones SQL)
     const result = await this.hotelRepository
       .createQueryBuilder()
       .insert()
@@ -32,9 +31,25 @@ export class HotelsService {
     return result.generatedMaps[0] as Hotel;
   }
 
-  async findAll(params: { page: number; limit: number; search: string }) {
-    const { page, limit, search } = params;
+  async findAll(params: {
+    page: number;
+    limit: number;
+    search: string;
+    sortBy?: string;
+    order?: string;
+  }) {
+    const { page, limit, search, sortBy = 'createdAt', order = 'DESC' } = params;
     const skip = (page - 1) * limit;
+
+    // Whitelist de campos permitidos para evitar SQL injection
+    const allowedSortFields: Record<string, string> = {
+      createdAt: 'hotel.createdAt',
+      name:      'hotel.name',
+      address:   'hotel.address',
+    };
+
+    const sortField = allowedSortFields[sortBy] ?? 'hotel.createdAt';
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const qb = this.hotelRepository
       .createQueryBuilder('hotel')
@@ -50,6 +65,7 @@ export class HotelsService {
     }
 
     const [data, total] = await qb
+      .orderBy(sortField, sortOrder)
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -76,7 +92,6 @@ export class HotelsService {
     const { location, ...rest } = dto;
 
     if (location) {
-      //Si hay location → QueryBuilder también
       const [lng, lat] = location.split(',').map(Number);
       await this.hotelRepository
         .createQueryBuilder()
@@ -88,7 +103,6 @@ export class HotelsService {
         .where('id = :id', { id })
         .execute();
     } else {
-      // Sin location → save() normal
       const hotel = await this.findOne(id);
       Object.assign(hotel, rest);
       await this.hotelRepository.save(hotel);
