@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -9,9 +9,9 @@ export default function DashboardLayout() {
 
   const menu = [
     { icon: '📊', name: 'Dashboard', path: '/dashboard' },
-    { icon: '🏨', name: 'Hoteles', path: '/hotels' },
-    { icon: '🛏️', name: 'Habitaciones', path: '/rooms' },
-    { icon: '📅', name: 'Reservas', path: '/reservations' },
+    { icon: '🏨', name: 'Hoteles', path: '/dashboard/hotels' },
+    { icon: '🛏️', name: 'Habitaciones', path: '/dashboard/rooms' },
+    { icon: '📅', name: 'Reservas', path: '/dashboard/reservations' },
   ];
 
   return (

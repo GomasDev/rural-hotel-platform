@@ -4,9 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
+import { runSeed } from './../src/database/seed';
 import { createConnection } from 'net';
 
-// Helper to wait for DB
+// ── Helper: esperar a que la DB esté lista ─────────────────────────────────
 async function waitForDatabase(host: string, port: number, retries = 20): Promise<void> {
   for (let i = 0; i < retries; i++) {
     try {
@@ -22,21 +23,33 @@ async function waitForDatabase(host: string, port: number, retries = 20): Promis
         }, 1000);
       });
       return;
-    } catch (error) {
-      // Ignore
+    } catch {
+      // reintento
     }
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   throw new Error('Database not ready');
 }
 
+// ── Emails efímeros (se limpian entre cada test) ───────────────────────────
+const EPHEMERAL_EMAILS = [
+  'test@ruralhot.com',
+  'admin_test@ruralhot.com',
+  'reset-test@ruralhot.com',
+];
+
+// ── Emails persistentes (duran toda la suite, se limpian en afterAll) ─────
+const PERSISTENT_EMAILS = [
+  'superadmin_e2e@ruralhot.com',
+  'client_e2e@ruralhot.com',
+];
+
+// ──────────────────────────────────────────────────────────────────────────
 describe('Auth & Users (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
 
-  // ✅ beforeAll → una sola vez (más rápido)
   beforeAll(async () => {
-    // Wait for DB to be ready
     await waitForDatabase('db', 5432);
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -47,17 +60,32 @@ describe('Auth & Users (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    dataSource = moduleFixture.get(DataSource); // ← acceso directo a DB
+    dataSource = moduleFixture.get(DataSource);
+
+    // Limpia residuos de ejecuciones anteriores
+    await dataSource.query(
+      `DELETE FROM users WHERE email = ANY($1::text[])`,
+      [[...EPHEMERAL_EMAILS, ...PERSISTENT_EMAILS]]
+    );
   });
 
+  // ✅ Al terminar: limpia los de test y relanza el seed → DB queda limpia
   afterAll(async () => {
+    await dataSource.query(
+      `DELETE FROM users WHERE email = ANY($1::text[])`,
+      [[...EPHEMERAL_EMAILS, ...PERSISTENT_EMAILS]]
+    );
+
+    await runSeed(dataSource, true);
+
     await app.close();
   });
 
-  // ✅ Limpia usuarios de test ANTES de cada test
+  // ✅ Entre cada test solo borra los efímeros — los persistentes sobreviven
   beforeEach(async () => {
     await dataSource.query(
-      `DELETE FROM users WHERE email IN ('test@ruralhot.com', 'admin_test@ruralhot.com')`
+      `DELETE FROM users WHERE email = ANY($1::text[])`,
+      [EPHEMERAL_EMAILS]
     );
   });
 
@@ -123,7 +151,7 @@ describe('Auth & Users (e2e)', () => {
   });
 
   // ─────────────────────────────────────────────
-  // TEST 5: client → 403 (guard funciona ✅)
+  // TEST 5: client → 403
   // ─────────────────────────────────────────────
   it('/users + JWT client → 403 Forbidden', async () => {
     await request(app.getHttpServer())
@@ -145,11 +173,11 @@ describe('Auth & Users (e2e)', () => {
     return request(app.getHttpServer())
       .get('/users')
       .set('Authorization', `Bearer ${login.body.access_token}`)
-      .expect(403); // ← client bloqueado por RolesGuard ✅
+      .expect(403);
   });
 
   // ─────────────────────────────────────────────
-  // TEST 6: super_admin → 200 ✅
+  // TEST 6: super_admin → 200
   // ─────────────────────────────────────────────
   it('/users + JWT super_admin → 200', async () => {
     await request(app.getHttpServer())
@@ -173,129 +201,129 @@ describe('Auth & Users (e2e)', () => {
       .set('Authorization', `Bearer ${login.body.access_token}`)
       .expect(200)
       .expect(res => {
-        expect(Array.isArray(res.body)).toBe(true); // ← devuelve array ✅
+        expect(Array.isArray(res.body)).toBe(true);
       });
   });
 
   // ─────────────────────────────────────────────
-// TEST 7: Forgot Password → Email OK (sin Mailpit)
-// ─────────────────────────────────────────────
-it('/auth/forgot-password → 201 (no revela si existe)', async () => {
-  // Registra usuario primero
-  await request(app.getHttpServer())
-    .post('/auth/register')
-    .send({
-      name: 'Test',
-      lastName1: 'Reset',
-      lastName2: '',
-      email: 'test@ruralhot.com',
-      password: 'Test1234.',
-      role: 'client',
-    });
+  // TEST 7: Forgot Password
+  // ─────────────────────────────────────────────
+  it('/auth/forgot-password → 201 (no revela si existe)', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'Test',
+        lastName1: 'Reset',
+        lastName2: '',
+        email: 'test@ruralhot.com',
+        password: 'Test1234.',
+        role: 'client',
+      });
 
-  // Forgot password → debe responder OK aunque NO chequee Mailpit
-  const response = await request(app.getHttpServer())
-    .post('/auth/forgot-password')
-    .send({ email: 'test@ruralhot.com' })
-    .expect(201);
+    const response = await request(app.getHttpServer())
+      .post('/auth/forgot-password')
+      .send({ email: 'test@ruralhot.com' })
+      .expect(201);
 
-  expect(response.body.message).toContain('enviado');
-});
+    expect(response.body.message).toContain('enviado');
+  });
 
-// ─────────────────────────────────────────────
-// TEST 8: Reset Password → Token inválido → 400
-// ─────────────────────────────────────────────
-it('/auth/reset-password → 400 token inválido', () => {
-  return request(app.getHttpServer())
-    .post('/auth/reset-password')
-    .send({ 
-      token: 'token-falso-123', 
-      newPassword: 'NewPass123!'  
-    })
-    .expect(400)
-    .expect(res => {
-      expect(res.body.message).toContain('Token inválido');
-    });
-});
+  // ─────────────────────────────────────────────
+  // TEST 8: Reset Password → token inválido → 400
+  // ─────────────────────────────────────────────
+  it('/auth/reset-password → 400 token inválido', () => {
+    return request(app.getHttpServer())
+      .post('/auth/reset-password')
+      .send({ token: 'token-falso-123', newPassword: 'NewPass123!' })
+      .expect(400)
+      .expect(res => {
+        expect(res.body.message).toContain('Token inválido');
+      });
+  });
 
-// ─────────────────────────────────────────────
-// TEST 9: Flujo completo Register → Forgot → Reset → Login
-// ─────────────────────────────────────────────
-it('Register → Forgot → Reset → Login exitoso', async () => {
-  const email = 'reset-test@ruralhot.com';
-  const oldPass = 'Old1234.';
-  const newPass = 'New1234.';
+  // ─────────────────────────────────────────────
+  // TEST 9: Register → Forgot → Reset → Login
+  // ─────────────────────────────────────────────
+  it('Register → Forgot → Reset → Login exitoso', async () => {
+    const email = 'reset-test@ruralhot.com';
 
-  // 1. Register
-  await request(app.getHttpServer())
-    .post('/auth/register')
-    .send({
-      name: 'Reset',
-      lastName1: 'Test',
-      lastName2: '',
-      email: email,
-      password: oldPass,
-      role: 'client',
-    });
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'Reset',
+        lastName1: 'Test',
+        lastName2: '',
+        email,
+        password: 'Old1234.',
+        role: 'client',
+      });
 
-  // 2. Forgot password (genera token en DB)
-  await request(app.getHttpServer())
-    .post('/auth/forgot-password')
-    .send({ email: email });
+    await request(app.getHttpServer())
+      .post('/auth/forgot-password')
+      .send({ email });
 
-  //Extrae token directo de DB para test
-  const tokenResult = await dataSource.query(
-    `SELECT reset_password_token FROM users WHERE email = $1`,
-    [email]
-  );
-  const token = tokenResult[0]?.reset_password_token;
-  expect(token).toBeTruthy();
+    const tokenResult = await dataSource.query(
+      `SELECT reset_password_token FROM users WHERE email = $1`, [email]
+    );
+    const token = tokenResult[0]?.reset_password_token;
+    expect(token).toBeTruthy();
 
-  // 4. Reset con token real
-  await request(app.getHttpServer())
-    .post('/auth/reset-password')
-    .send({ token, newPassword: newPass })
-    .expect(201);
+    await request(app.getHttpServer())
+      .post('/auth/reset-password')
+      .send({ token, newPassword: 'New1234.' })
+      .expect(201);
 
-  // 5. Login con NUEVA contraseña ✅
-  const login = await request(app.getHttpServer())
-    .post('/auth/login')
-    .send({ email, password: newPass })
-    .expect(201);
+    const login = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password: 'New1234.' })
+      .expect(201);
 
-  expect(login.body).toHaveProperty('access_token');
-});
+    expect(login.body).toHaveProperty('access_token');
+  });
 
-// ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────
   // HOTELES & HABITACIONES (RBAC & Relaciones)
   // ─────────────────────────────────────────────
-
   let adminToken: string;
   let clientToken: string;
   let createdHotelId: string;
 
-  // Setup de tokens para los tests de negocio
+  // ✅ Crea usuarios persistentes para los tests de negocio
   beforeAll(async () => {
-    // Registrar y loguear un Admin
-    await request(app.getHttpServer()).post('/auth/register').send({
-      name: 'Admin', lastName1: 'Hotel', email: 'admin_hotel@test.com', password: 'Password123!', role: 'super_admin'
-    });
-    const loginAdmin = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'admin_hotel@test.com', password: 'Password123!'
-    });
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'SuperAdmin',
+        lastName1: 'E2E',
+        lastName2: '',
+        email: 'superadmin_e2e@ruralhot.com',
+        password: 'SuperAdmin123!',
+        role: 'super_admin',
+      });
+
+    const loginAdmin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'superadmin_e2e@ruralhot.com', password: 'SuperAdmin123!' });
     adminToken = loginAdmin.body.access_token;
 
-    // Registrar y loguear un Cliente
-    await request(app.getHttpServer()).post('/auth/register').send({
-      name: 'Client', lastName1: 'Hotel', email: 'client_hotel@test.com', password: 'Password123!', role: 'client'
-    });
-    const loginClient = await request(app.getHttpServer()).post('/auth/login').send({
-      email: 'client_hotel@test.com', password: 'Password123!'
-    });
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        name: 'Client',
+        lastName1: 'E2E',
+        lastName2: '',
+        email: 'client_e2e@ruralhot.com',
+        password: 'Client123!',
+        role: 'client',
+      });
+
+    const loginClient = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'client_e2e@ruralhot.com', password: 'Client123!' });
     clientToken = loginClient.body.access_token;
   });
 
-  it('POST /hotels → 403 Forbidden si el usuario es "client"', async () => {
+  it('POST /hotels → 403 Forbidden si el usuario es "client"', () => {
     return request(app.getHttpServer())
       .post('/hotels')
       .set('Authorization', `Bearer ${clientToken}`)
@@ -304,7 +332,7 @@ it('Register → Forgot → Reset → Login exitoso', async () => {
         address: 'Calle Falsa 123',
         location: '0,0',
         phone: '123',
-        email: 'bad@hotel.com'
+        email: 'bad@hotel.com',
       })
       .expect(403);
   });
@@ -320,13 +348,12 @@ it('Register → Forgot → Reset → Login exitoso', async () => {
         location: '40.41, -3.70',
         phone: '911223344',
         email: 'granhotel@test.com',
-        ownerId: 'b8732a73-fb60-4073-bdc7-42435f18a310', // Usa un UUID válido de tu DB
         images: [],
-        isActive: true
+        isActive: true,
       })
       .expect(201);
 
-    createdHotelId = response.body.id; // Guardamos el ID para el test de habitaciones
+    createdHotelId = response.body.id;
     expect(createdHotelId).toBeDefined();
   });
 
@@ -341,7 +368,7 @@ it('Register → Forgot → Reset → Login exitoso', async () => {
         capacity: 2,
         pricePerNight: 150.00,
         images: [],
-        isAvailable: true
+        isAvailable: true,
       })
       .expect(201);
 
@@ -349,19 +376,15 @@ it('Register → Forgot → Reset → Login exitoso', async () => {
   });
 
   it('DELETE /hotels/:id → Borrado en cascada de habitaciones', async () => {
-    // 1. Borramos el hotel
     await request(app.getHttpServer())
       .delete(`/hotels/${createdHotelId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    // 2. Verificamos en DB que la habitación ha desaparecido (Cascade)
     const roomCount = await dataSource.query(
       `SELECT COUNT(*) FROM rooms WHERE hotel_id = $1`,
       [createdHotelId]
     );
     expect(parseInt(roomCount[0].count)).toBe(0);
   });
-
-  
 });

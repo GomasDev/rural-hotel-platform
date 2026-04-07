@@ -4,13 +4,15 @@ import {
 } from 'class-validator';
 
 export class CreateHotelDto {
+
+  @IsOptional() // Se asignará automáticamente en el service
   @IsUUID()
-  ownerId: string;
+  ownerId?: string;
 
   @IsString()
   @MinLength(3)
   @MaxLength(150)
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
@@ -18,11 +20,11 @@ export class CreateHotelDto {
 
   @IsString()
   @MaxLength(255)
-  address: string;
+  address!: string;
 
   // Formato: "longitude,latitude" → ej: "-3.7038,40.4168"
   @IsString()
-  location: string;
+  location!: string;
 
   @IsOptional()
   @IsString()

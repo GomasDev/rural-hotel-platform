@@ -5,27 +5,28 @@ import { UpdateHotelDto } from './dto/update-hotel.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 
+// ✅ Sin @UseGuards en la clase — cada método gestiona su propio acceso
 @Controller('hotels')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class HotelsController {
   constructor(private readonly hotelsService: HotelsService) {}
 
-  @Post()
-  @Roles('super_admin', 'admin')
-  create(@Body() dto: CreateHotelDto) {
-    return this.hotelsService.create(dto);
-  }
-
+  //PÚBLICOS — sin token
   @Get()
-  @Roles('super_admin', 'admin', 'client')
-  findAll() {
-    return this.hotelsService.findAll();
+  findAll(
+    @Query('page')   page   = '1',
+    @Query('limit')  limit  = '9',
+    @Query('search') search = '',
+  ) {
+    return this.hotelsService.findAll({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+    });
   }
 
-  // Para Sprint 3 → GET /hotels/nearby?lng=-3.70&lat=40.41&radius=10
   @Get('nearby')
-  @Roles('super_admin', 'admin', 'client')
   findNearby(
     @Query('lng') lng: string,
     @Query('lat') lat: string,
@@ -35,18 +36,30 @@ export class HotelsController {
   }
 
   @Get(':id')
-  @Roles('super_admin', 'admin', 'client')
   findOne(@Param('id') id: string) {
     return this.hotelsService.findOne(id);
   }
 
+  //PROTEGIDOS — requieren token y rol
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('super_admin', 'admin')
+  create(
+    @Body() dto: CreateHotelDto,
+    @GetUser('userId') ownerId: string,
+  ) {
+    return this.hotelsService.create(dto, ownerId);
+  }
+
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('super_admin', 'admin')
   update(@Param('id') id: string, @Body() dto: UpdateHotelDto) {
     return this.hotelsService.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('super_admin')
   remove(@Param('id') id: string) {
     return this.hotelsService.remove(id);

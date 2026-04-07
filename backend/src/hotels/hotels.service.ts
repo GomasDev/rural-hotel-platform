@@ -12,7 +12,7 @@ export class HotelsService {
     private readonly hotelRepository: Repository<Hotel>,
   ) {}
 
-  async create(dto: CreateHotelDto): Promise<Hotel> {
+  async create(dto: CreateHotelDto, ownerId: string): Promise<Hotel> {
     const { location, ...rest } = dto;
     const [lng, lat] = location.split(',').map(Number);
 
@@ -23,6 +23,7 @@ export class HotelsService {
       .into(Hotel)
       .values({
         ...rest,
+        ownerId,
         location: () => `ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`,
       })
       .returning('*')
@@ -31,11 +32,35 @@ export class HotelsService {
     return result.generatedMaps[0] as Hotel;
   }
 
-  async findAll(): Promise<Hotel[]> {
-    return this.hotelRepository.find({
-      where: { isActive: true },
-      relations: ['owner', 'rooms'],
-    });
+  async findAll(params: { page: number; limit: number; search: string }) {
+    const { page, limit, search } = params;
+    const skip = (page - 1) * limit;
+
+    const qb = this.hotelRepository
+      .createQueryBuilder('hotel')
+      .leftJoinAndSelect('hotel.owner', 'owner')
+      .leftJoinAndSelect('hotel.rooms', 'rooms')
+      .where('hotel.isActive = true');
+
+    if (search) {
+      qb.andWhere(
+        '(LOWER(hotel.name) LIKE :s OR LOWER(hotel.address) LIKE :s)',
+        { s: `%${search.toLowerCase()}%` },
+      );
+    }
+
+    const [data, total] = await qb
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string): Promise<Hotel> {

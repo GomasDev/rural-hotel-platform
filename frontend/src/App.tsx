@@ -1,31 +1,46 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import LandingPage from './pages/LandingPage'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ForgotPassword from './pages/ForgotPassword'
-import Dashboard from './pages/Dashboard'
+
+// Páginas públicas
+import LandingPage from './pages/public/LandingPage'
+import Login from './pages/public/Login'
+import Register from './pages/public/Register'
+import ForgotPassword from './pages/public/ForgotPassword'
+import ResetPassword from './pages/public/ResetPassword'
+
+// Páginas del dashboard
+import Dashboard from './pages/dashboard/Dashboard'
+import Hotels from './pages/dashboard/Hotels'
+import Rooms from './pages/dashboard/Rooms'
+import Reservations from './pages/dashboard/Reservations'
+
+// Componentes
 import ProtectedRoute from './components/ProtectedRoute'
-import './App.css'
-import ResetPassword from './pages/ResetPassword'
+import DashboardLayout from './components/layouts/DashboardLayout'
 import { AuthProvider } from './context/AuthContext'
-import DashboardLayout from './components/DashboardLayout'
+
+import './App.css'
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/register" element={<Register/>} />
-          <Route path="/forgot-password" element={<ForgotPassword/>} />
+          {/* ── Rutas públicas ── */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path='/reset-password/:token' element={<ResetPassword />} />
-          <Route path="/reset-password/*" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          {/* ── Dashboard (protegido) ── */}
           <Route path="/dashboard/*" element={
             <ProtectedRoute element={<DashboardLayout />} />
           }>
             <Route index element={<Dashboard />} />
+            <Route path="hotels" element={<Hotels />} />
+            <Route path="rooms" element={<Rooms />} />
+            <Route path="reservations" element={<Reservations />} />
           </Route>
         </Routes>
       </BrowserRouter>
