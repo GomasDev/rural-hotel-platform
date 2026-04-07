@@ -14,11 +14,12 @@ interface Room {
   pricePerNight: number;
   images: string[];
   isAvailable: boolean;
+  hotelId?: string;
 }
 
 export default function Rooms() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [selectedHotel, setSelectedHotel] = useState<string>('');
+  const [selectedHotel, setSelectedHotel] = useState<string>('all');
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loadingHotels, setLoadingHotels] = useState(true);
   const [loadingRooms, setLoadingRooms] = useState(false);
@@ -30,27 +31,37 @@ export default function Rooms() {
   useEffect(() => {
     fetch(`${API}/hotels?limit=100`)
       .then(res => res.json())
-      .then(data => {
-        setHotels(data.data ?? data); // soporta paginado y array directo
-        if ((data.data ?? data).length > 0) {
-          setSelectedHotel((data.data ?? data)[0].id);
-        }
-      })
+      .then(data => setHotels(data.data ?? data))
       .catch(() => setError('Error al cargar hoteles'))
       .finally(() => setLoadingHotels(false));
   }, []);
 
   // Cargar habitaciones cuando cambia el hotel seleccionado
   useEffect(() => {
-    if (!selectedHotel) return;
     setLoadingRooms(true);
     setRooms([]);
+    setError(null);
 
-    fetch(`${API}/rooms/hotel/${selectedHotel}`)
-      .then(res => res.json())
-      .then(data => setRooms(data))
-      .catch(() => setError('Error al cargar habitaciones'))
-      .finally(() => setLoadingRooms(false));
+    if (selectedHotel === 'all') {
+      // Pide todos los hoteles con sus rooms incluidas y las aplana
+      fetch(`${API}/hotels?limit=100`)
+        .then(res => res.json())
+        .then(data => {
+          const allHotels = data.data ?? data;
+          const allRooms = allHotels.flatMap((h: any) =>
+            (h.rooms ?? []).map((r: Room) => ({ ...r, hotelId: h.id }))
+          );
+          setRooms(allRooms);
+        })
+        .catch(() => setError('Error al cargar habitaciones'))
+        .finally(() => setLoadingRooms(false));
+    } else {
+      fetch(`${API}/rooms/hotel/${selectedHotel}`)
+        .then(res => res.json())
+        .then(data => setRooms(data))
+        .catch(() => setError('Error al cargar habitaciones'))
+        .finally(() => setLoadingRooms(false));
+    }
   }, [selectedHotel]);
 
   if (loadingHotels) return (
@@ -82,6 +93,8 @@ export default function Rooms() {
           onChange={e => setSelectedHotel(e.target.value)}
           className="border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white md:w-72"
         >
+          {/* ✅ Opción "Todos los hoteles" */}
+          <option value="all">🏨 Todos los hoteles</option>
           {hotels.map(h => (
             <option key={h.id} value={h.id}>{h.name}</option>
           ))}
@@ -122,6 +135,13 @@ export default function Rooms() {
               </div>
 
               <div className="p-5">
+                {/* Nombre del hotel si estamos en "todos" */}
+                {selectedHotel === 'all' && room.hotelId && (
+                  <p className="text-xs text-green-600 font-medium mb-1">
+                    🏨 {hotels.find(h => h.id === room.hotelId)?.name ?? ''}
+                  </p>
+                )}
+
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-gray-800 text-lg leading-tight">{room.name}</h3>
                   <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ml-2 ${
