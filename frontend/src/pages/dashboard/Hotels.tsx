@@ -82,7 +82,10 @@ export default function Hotels() {
     });
     fetch(`${import.meta.env.VITE_API_URL}/hotels?${params}`)
       .then(res => { if (!res.ok) throw new Error('Error al cargar hoteles'); return res.json(); })
-      .then(data => setResponse(data))
+      .then(data => {
+        console.log('ORDER:', ord.toUpperCase(), data.data.map((h: Hotel) => h.name)); // ← AÑADE ESTO
+        setResponse(data);
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [page, search, sortBy, refreshKey]);

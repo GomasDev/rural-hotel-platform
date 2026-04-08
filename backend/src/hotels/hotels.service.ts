@@ -32,29 +32,36 @@ export class HotelsService {
   }
 
   async findAll(params: {
-    page: number;
-    limit: number;
-    search: string;
+    page?: number;
+    limit?: number;
+    search?: string;
     sortBy?: string;
     order?: string;
   }) {
-    const { page, limit, search, sortBy = 'createdAt', order = 'DESC' } = params;
+    const {
+      page = 1,
+      limit = 9,
+      search = '',
+      sortBy = 'createdAt',
+      order = 'DESC',
+    } = params;
+
     const skip = (page - 1) * limit;
 
-    // Whitelist de campos permitidos para evitar SQL injection
     const allowedSortFields: Record<string, string> = {
       createdAt: 'hotel.createdAt',
-      name:      'hotel.name',
-      address:   'hotel.address',
+      name: 'hotel.name',
+      address: 'hotel.address',
     };
 
     const sortField = allowedSortFields[sortBy] ?? 'hotel.createdAt';
-    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const sortOrder: 'ASC' | 'DESC' =
+      order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const qb = this.hotelRepository
       .createQueryBuilder('hotel')
       .leftJoinAndSelect('hotel.owner', 'owner')
-      .leftJoinAndSelect('hotel.rooms', 'rooms')
+      // rooms NO se carga aquí: causa orden roto con skip/take en TypeORM
       .where('hotel.isActive = true');
 
     if (search) {
@@ -66,6 +73,7 @@ export class HotelsService {
 
     const [data, total] = await qb
       .orderBy(sortField, sortOrder)
+      .addOrderBy('hotel.id', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -117,7 +125,11 @@ export class HotelsService {
     return { message: `Hotel ${id} eliminado correctamente` };
   }
 
-  async findNearby(lng: number, lat: number, radiusKm: number): Promise<Hotel[]> {
+  async findNearby(
+    lng: number,
+    lat: number,
+    radiusKm: number,
+  ): Promise<Hotel[]> {
     return this.hotelRepository
       .createQueryBuilder('hotel')
       .where(

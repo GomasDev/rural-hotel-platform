@@ -25,6 +25,8 @@ export class HotelsController {
       page: parseInt(page),
       limit: parseInt(limit),
       search,
+      sortBy,
+      order,
     });
   }
 

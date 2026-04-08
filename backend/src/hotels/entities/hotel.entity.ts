@@ -8,23 +8,23 @@ import { User } from '../../users/entities/user.entity';
 @Entity('hotels')
 export class Hotel {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_id' })
-  owner: User;
+  owner!: User;
 
   @Column({ name: 'owner_id' })
-  ownerId: string;
+  ownerId!: string;
 
   @Column({ type: 'varchar', length: 150 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
 
   @Column({ type: 'varchar', length: 255 })
-  address: string;
+  address!: string;
 
   // PostGIS Point → guardamos como string "lng,lat" o usamos raw
   @Column({
@@ -33,7 +33,7 @@ export class Hotel {
     srid: 4326,
     nullable: false,
   })
-  location: string;
+  location!: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone?: string;
@@ -45,11 +45,11 @@ export class Hotel {
   images?: string[];
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @OneToMany(() => Room, (room) => room.hotel, { cascade: true })
-  rooms: Room[];
+  rooms!: Room[];
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 }
