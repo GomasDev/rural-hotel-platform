@@ -61,7 +61,6 @@ export class HotelsService {
     const qb = this.hotelRepository
       .createQueryBuilder('hotel')
       .leftJoinAndSelect('hotel.owner', 'owner')
-      // rooms NO se carga aquí: causa orden roto con skip/take en TypeORM
       .where('hotel.isActive = true');
 
     if (search) {
@@ -71,12 +70,27 @@ export class HotelsService {
       );
     }
 
+    // 1️⃣ Paginamos SIN rooms (evita el bug de TypeORM con skip/take)
     const [data, total] = await qb
       .orderBy(sortField, sortOrder)
       .addOrderBy('hotel.id', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
+
+    // 2️⃣ Cargamos rooms solo para los hoteles de esta página
+    const ids = data.map(h => h.id);
+    if (ids.length > 0) {
+      const hotelsWithRooms = await this.hotelRepository
+        .createQueryBuilder('hotel')
+        .leftJoinAndSelect('hotel.rooms', 'rooms')
+        .where('hotel.id IN (:...ids)', { ids })
+        .getMany();
+
+      // 3️⃣ Mapeamos las rooms al resultado paginado manteniendo el orden
+      const roomsMap = new Map(hotelsWithRooms.map(h => [h.id, h.rooms]));
+      data.forEach(h => { h.rooms = roomsMap.get(h.id) ?? []; });
+    }
 
     return {
       data,
