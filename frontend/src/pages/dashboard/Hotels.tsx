@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../hooks/useFavorites';
 import WeatherWidget from '../../components/WeatherWidget';
+import AdminOccupancyCalendar from '../../components/AdminOccupancyCalendar';
 import HotelRooms from './HotelRooms';
 
 type GeoLocation = string | { type: string; coordinates: [number, number] };
@@ -10,6 +11,11 @@ interface Hotel {
   id: string; name: string; description?: string; address: string;
   location?: GeoLocation; phone?: string; email?: string;
   images: string[]; isActive: boolean; ownerId: string;
+}
+
+interface Room {
+  id: string; name: string; capacity: number;
+  pricePerNight: string; isAvailable: boolean; images: string[];
 }
 
 interface HotelsResponse {
@@ -64,7 +70,22 @@ export default function Hotels() {
   const [imageInput, setImageInput] = useState('');
   const [roomsModal, setRoomsModal] = useState<{ open: boolean; hotel?: Hotel }>({ open: false });
 
-  // Weather open state per hotel
+  // ── Calendario de ocupación ────────────────────────────────────────────────
+  const [calModal, setCalModal] = useState<{ open: boolean; hotel?: Hotel; rooms: Room[] }>({ open: false, rooms: [] });
+  const [calLoading, setCalLoading] = useState(false);
+
+  const openCalendar = async (hotel: Hotel) => {
+    setCalModal({ open: true, hotel, rooms: [] });
+    setCalLoading(true);
+    try {
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/rooms/hotel/${hotel.id}`);
+      const data = await res.json();
+      setCalModal({ open: true, hotel, rooms: Array.isArray(data) ? data : [] });
+    } catch {}
+    finally { setCalLoading(false); }
+  };
+  // ──────────────────────────────────────────────────────────────────────────
+
   const [weatherOpen, setWeatherOpen] = useState<Set<string>>(new Set());
   const toggleWeather = (id: string) =>
     setWeatherOpen(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -248,13 +269,9 @@ export default function Hotels() {
                       ? <img src={hotel.images[0]} alt={hotel.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       : <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">🏡</span></div>
                     }
-
-                    {/* Badge estado */}
                     <span className={`absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full font-semibold ${hotel.isActive ? 'bg-white text-green-700' : 'bg-white text-gray-500'}`}>
                       {hotel.isActive ? 'Activo' : 'Inactivo'}
                     </span>
-
-                    {/* Botón favorito — solo en explore */}
                     {tab === 'explore' && (
                       <button
                         onClick={e => { e.stopPropagation(); toggleFav(hotel.id); }}
@@ -287,7 +304,7 @@ export default function Hotels() {
                       {hotel.images?.length > 0 && <span>🖼️ {hotel.images.length} img</span>}
                     </div>
 
-                    {/* Previsión del tiempo — solo en explore, solo si tiene coordenadas */}
+                    {/* Previsión del tiempo */}
                     {tab === 'explore' && coords && (
                       <div className="border-t border-gray-100 pt-3 mb-3">
                         <button
@@ -308,12 +325,25 @@ export default function Hotels() {
                       </div>
                     )}
 
-                    {/* Botones manage */}
+                    {/* Botones manage ── ✅ añadido botón Ocupación */}
                     {tab === 'manage' && (
                       <div className="flex gap-2 pt-3 border-t border-gray-100">
-                        <button onClick={() => openEdit(hotel)} className="flex-1 py-2 text-xs font-medium border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition">✏️ Editar</button>
-                        <button onClick={() => openRooms(hotel)} className="flex-1 py-2 text-xs font-medium border border-blue-200 rounded-full text-blue-700 hover:bg-blue-50 transition">🛏️ Hab.</button>
-                        <button onClick={() => handleDelete(hotel)} className="flex-1 py-2 text-xs font-medium border border-red-100 rounded-full text-red-600 hover:bg-red-50 transition">🗑️</button>
+                        <button onClick={() => openEdit(hotel)}
+                          className="flex-1 py-2 text-xs font-medium border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition">
+                          ✏️ Editar
+                        </button>
+                        <button onClick={() => openRooms(hotel)}
+                          className="flex-1 py-2 text-xs font-medium border border-blue-200 rounded-full text-blue-700 hover:bg-blue-50 transition">
+                          🛏️ Hab.
+                        </button>
+                        <button onClick={() => openCalendar(hotel)}
+                          className="flex-1 py-2 text-xs font-medium border border-orange-200 rounded-full text-orange-600 hover:bg-orange-50 transition">
+                          📅 Ocup.
+                        </button>
+                        <button onClick={() => handleDelete(hotel)}
+                          className="flex-1 py-2 text-xs font-medium border border-red-100 rounded-full text-red-600 hover:bg-red-50 transition">
+                          🗑️
+                        </button>
                       </div>
                     )}
                   </div>
@@ -356,8 +386,8 @@ export default function Hotels() {
                 {formError && <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-xl">{formError}</p>}
 
                 {[
-                  { label: 'Nombre *',    key: 'name',    type: 'text',  ph: 'Nombre del hotel' },
-                  { label: 'Dirección *', key: 'address', type: 'text',  ph: 'Ej: Sierra Norte, Madrid' },
+                  { label: 'Nombre *',    key: 'name',    type: 'text', ph: 'Nombre del hotel' },
+                  { label: 'Dirección *', key: 'address', type: 'text', ph: 'Ej: Sierra Norte, Madrid' },
                 ].map(f => (
                   <div key={f.key}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
@@ -429,6 +459,42 @@ export default function Hotels() {
             </div>
           </div>
         )}
+
+        {/* ── Modal calendario ocupación ✅ ──────────────────────────────── */}
+        {calModal.open && calModal.hotel && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Ocupación</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">{calModal.hotel.name}</p>
+                </div>
+                <button
+                  onClick={() => setCalModal({ open: false, rooms: [] })}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400"
+                >✕</button>
+              </div>
+
+              <div className="overflow-y-auto flex-1 p-6">
+                {calLoading ? (
+                  <div className="space-y-4">
+                    {[...Array(2)].map((_, i) => (
+                      <div key={i} className="animate-pulse h-64 bg-gray-100 rounded-2xl" />
+                    ))}
+                  </div>
+                ) : calModal.rooms.length === 0 ? (
+                  <div className="text-center py-20">
+                    <p className="text-5xl mb-3">🛏️</p>
+                    <p className="text-gray-400 text-sm">Este hotel no tiene habitaciones registradas.</p>
+                  </div>
+                ) : (
+                  <AdminOccupancyCalendar rooms={calModal.rooms} />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ─────────────────────────────────────────────────────────────── */}
       </div>
 
       {roomsModal.open && roomsModal.hotel && (

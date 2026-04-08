@@ -1,0 +1,85 @@
+.rcal .react-calendar {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: white;
+}
+.rcal .react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.rcal .react-calendar__navigation button {
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  color: #374151;
+  cursor: pointer;
+  min-width: 2rem;
+}
+.rcal .react-calendar__navigation button:hover { background: #f3f4f6; }
+.rcal .react-calendar__navigation__label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #111827;
+  flex: 1;
+}
+.rcal .react-calendar__month-view__weekdays {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+.rcal .react-calendar__month-view__weekdays__weekday abbr { text-decoration: none; }
+.rcal .react-calendar__tile {
+  background: none;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.2rem;
+  font-size: 0.78rem;
+  color: #374151;
+  cursor: pointer;
+  text-align: center;
+}
+.rcal .react-calendar__tile:hover:not(:disabled) { background: #dcfce7; }
+.rcal .react-calendar__tile--now { background: #f0fdf4; color: #15803d; font-weight: 700; }
+.rcal .react-calendar__tile--range { background: #dcfce7; color: #15803d; border-radius: 0; }
+.rcal .react-calendar__tile--rangeStart,
+.rcal .react-calendar__tile--rangeEnd {
+  background: #15803d !important;
+  color: white !important;
+}
+.rcal .react-calendar__tile--rangeStart { border-radius: 0.4rem 0 0 0.4rem !important; }
+.rcal .react-calendar__tile--rangeEnd   { border-radius: 0 0.4rem 0.4rem 0 !important; }
+.rcal .react-calendar__tile:disabled {
+  background: #fee2e2 !important;
+  color: #f87171 !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+/* dot bajo días ocupados para admin (read-only) */
+.rcal .tile-occupied {
+  background: #fef2f2;
+  color: #ef4444;
+  font-weight: 600;
+  position: relative;
+}
+.rcal .tile-occupied::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+.rcal .tile-today-occupied { background: #fde8e8 !important; }
