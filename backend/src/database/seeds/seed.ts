@@ -1,8 +1,59 @@
+// src/database/seeds/seed.ts
+
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
-import type { UserRole } from './types';
+import type { UserRole } from '../types';
 dotenv.config();
+
+// ── Imágenes ───────────────────────────────────────────────────────────────
+
+const IMG = {
+  hotels: [
+    // La Posada del Valle — Asturias
+    [
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
+      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800',
+    ],
+    // Cortijo Sierra Nevada — Granada
+    [
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
+      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800',
+      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+    ],
+    // Masía Can Torrent — Barcelona
+    [
+      'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800',
+      'https://images.unsplash.com/photo-1600011689032-8b628b8a8747?w=800',
+      'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800',
+    ],
+    // Hotel Rural El Molino — Zamora
+    [
+      'https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=800',
+      'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800',
+      'https://images.unsplash.com/photo-1605346576626-c1a2f507e689?w=800',
+    ],
+    // Finca Los Olivos — Cáceres
+    [
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+      'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800',
+      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800',
+    ],
+  ],
+  rooms: [
+    // Habitaciones individuales / dobles
+    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
+    'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
+    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800',
+    // Suites
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
+    'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800',
+    // Habitaciones familiares
+    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800',
+    'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800',
+  ],
+};
 
 // ── Datos ──────────────────────────────────────────────────────────────────
 
@@ -27,10 +78,11 @@ const hotelsData = [
     address: 'Ctra. del Valle, 12, Cangas de Onís, Asturias',
     lng: -5.1295, lat: 43.3518,
     phone: '985123456', email: 'info@posadadelvalle.es',
+    images: IMG.hotels[0],
     rooms: [
-      { name: 'Habitación Doble Valle', capacity: 2, price: 95.00 },
-      { name: 'Suite Montaña',          capacity: 4, price: 155.00 },
-      { name: 'Habitación Individual',  capacity: 1, price: 65.00 },
+      { name: 'Habitación Doble Valle', capacity: 2, price: 95.00,  images: [IMG.rooms[0], IMG.rooms[1]] },
+      { name: 'Suite Montaña',          capacity: 4, price: 155.00, images: [IMG.rooms[3], IMG.rooms[4]] },
+      { name: 'Habitación Individual',  capacity: 1, price: 65.00,  images: [IMG.rooms[2]] },
     ],
   },
   {
@@ -39,9 +91,10 @@ const hotelsData = [
     address: 'Camino de la Sierra, s/n, Güéjar Sierra, Granada',
     lng: -3.4512, lat: 37.1543,
     phone: '958654321', email: 'reservas@cortijosierranevada.es',
+    images: IMG.hotels[1],
     rooms: [
-      { name: 'Suite Sierra',        capacity: 2, price: 120.00 },
-      { name: 'Habitación Familiar', capacity: 4, price: 140.00 },
+      { name: 'Suite Sierra',        capacity: 2, price: 120.00, images: [IMG.rooms[3], IMG.rooms[4]] },
+      { name: 'Habitación Familiar', capacity: 4, price: 140.00, images: [IMG.rooms[5], IMG.rooms[6]] },
     ],
   },
   {
@@ -50,10 +103,11 @@ const hotelsData = [
     address: "Camí de Can Torrent, 8, Sant Sadurní d'Anoia, Barcelona",
     lng: 1.7885, lat: 41.4231,
     phone: '938911234', email: 'hola@masiacantorrent.cat',
+    images: IMG.hotels[2],
     rooms: [
-      { name: 'Habitación Viñedo',        capacity: 2, price: 110.00 },
-      { name: 'Suite Masía',              capacity: 2, price: 175.00 },
-      { name: 'Habitación Doble Classic', capacity: 2, price: 85.00 },
+      { name: 'Habitación Viñedo',        capacity: 2, price: 110.00, images: [IMG.rooms[0], IMG.rooms[2]] },
+      { name: 'Suite Masía',              capacity: 2, price: 175.00, images: [IMG.rooms[3], IMG.rooms[4]] },
+      { name: 'Habitación Doble Classic', capacity: 2, price: 85.00,  images: [IMG.rooms[1]] },
     ],
   },
   {
@@ -62,9 +116,10 @@ const hotelsData = [
     address: 'Paraje El Molino, s/n, Fermoselle, Zamora',
     lng: -6.3978, lat: 41.3201,
     phone: '980567890', email: 'elmolino@ruralhot.com',
+    images: IMG.hotels[3],
     rooms: [
-      { name: 'Habitación Río',  capacity: 2, price: 80.00 },
-      { name: 'Suite El Molino', capacity: 3, price: 130.00 },
+      { name: 'Habitación Río',  capacity: 2, price: 80.00,  images: [IMG.rooms[1], IMG.rooms[2]] },
+      { name: 'Suite El Molino', capacity: 3, price: 130.00, images: [IMG.rooms[3], IMG.rooms[4]] },
     ],
   },
   {
@@ -73,10 +128,11 @@ const hotelsData = [
     address: 'Carretera EX-386, km 4, Jaraíz de la Vera, Cáceres',
     lng: -5.7512, lat: 40.0634,
     phone: '927112233', email: 'finca@losolivos.es',
+    images: IMG.hotels[4],
     rooms: [
-      { name: 'Habitación Olivar',     capacity: 2, price: 75.00 },
-      { name: 'Suite Finca',           capacity: 4, price: 145.00 },
-      { name: 'Habitación Individual', capacity: 1, price: 55.00 },
+      { name: 'Habitación Olivar',     capacity: 2, price: 75.00,  images: [IMG.rooms[0], IMG.rooms[2]] },
+      { name: 'Suite Finca',           capacity: 4, price: 145.00, images: [IMG.rooms[3], IMG.rooms[4]] },
+      { name: 'Habitación Individual', capacity: 1, price: 55.00,  images: [IMG.rooms[1]] },
     ],
   },
 ];
@@ -118,7 +174,7 @@ export async function runSeed(ds: DataSource, silent = false): Promise<void> {
       createdUsers.push(inserted[0]);
     } else {
       const existing = await ds.query(
-        `SELECT id, email, role FROM users WHERE email = $1`, [u.email]
+        `SELECT id, email, role FROM users WHERE email = $1`, [u.email],
       );
       if (existing[0]) createdUsers.push(existing[0]);
     }
@@ -140,7 +196,7 @@ export async function runSeed(ds: DataSource, silent = false): Promise<void> {
         $7, $8, $9, true
       )
       RETURNING id
-    `, [ownerId, h.name, h.description, h.address, h.lng, h.lat, h.phone, h.email, []]);
+    `, [ownerId, h.name, h.description, h.address, h.lng, h.lat, h.phone, h.email, h.images]);
 
     const hotelId = hotelResult[0].id;
 
@@ -148,7 +204,7 @@ export async function runSeed(ds: DataSource, silent = false): Promise<void> {
       await ds.query(`
         INSERT INTO rooms (hotel_id, name, description, capacity, price_per_night, images, is_available)
         VALUES ($1, $2, $3, $4, $5, $6, true)
-      `, [hotelId, room.name, `${room.name} — ${h.name}`, room.capacity, room.price, []]);
+      `, [hotelId, room.name, `${room.name} — ${h.name}`, room.capacity, room.price, room.images]);
       totalRooms++;
     }
   }
@@ -161,11 +217,11 @@ export async function runSeed(ds: DataSource, silent = false): Promise<void> {
 async function main() {
   const ds = new DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
+    host:     process.env.DB_HOST     || 'localhost',
+    port:     parseInt(process.env.DB_PORT || '5432'),
     username: process.env.DB_USERNAME || 'ruralhot',
     password: process.env.DB_PASSWORD || 'ruralhot',
-    database: process.env.DB_NAME || 'ruralhot',
+    database: process.env.DB_NAME     || 'ruralhot',
     ssl: false,
     synchronize: false,
   });
@@ -182,8 +238,6 @@ async function main() {
   console.log('─────────────────────────────────────────');
 }
 
-// ✅ Solo ejecuta main() si se invoca directamente (npm run seed)
-// Cuando se importa desde los tests, esta línea NO se dispara
 if (require.main === module) {
   main().catch(err => {
     console.error('❌ Error en seed:', err.message);

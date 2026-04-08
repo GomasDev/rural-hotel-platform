@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from './../src/app.module';
-import { runSeed } from './../src/database/seed';
+import { runSeed } from '../src/database/seeds/seed';
 import { createConnection } from 'net';
 
 // ── Helper: esperar a que la DB esté lista ─────────────────────────────────

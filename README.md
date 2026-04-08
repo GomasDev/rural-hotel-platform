@@ -147,3 +147,10 @@ npm run start:dev
 docker exec ruralhot-backend npm run test:e2e -- --verbose
 
 test
+
+
+seed
+
+# Todo en un comando, sin entrar al contenedor
+docker compose exec backend npm run seed
+docker compose exec backend npm run seed:tourism

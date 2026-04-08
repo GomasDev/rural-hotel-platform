@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { HotelsModule } from './hotels/hotels.module';
+import { HikingRoutesModule } from './hiking-routes/hiking-routes.module';
+import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -32,7 +34,9 @@ import { HotelsModule } from './hotels/hotels.module';
   AuthModule,
   UsersModule,
   HotelsModule,
-  RoomsModule
+  RoomsModule,
+  RestaurantsModule,
+  HikingRoutesModule,
 ],
   controllers: [AppController],
   providers: [AppService],
