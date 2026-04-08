@@ -12,21 +12,21 @@ export default function Dashboard() {
   const isClient     = user?.role === 'client';
 
   const adminCards = [
-    { icon: '🏨', title: 'Mis hoteles',     desc: 'Gestiona tus alojamientos',       color: 'from-green-50 to-emerald-100',  border: 'border-green-100' },
-    { icon: '🛏️', title: 'Habitaciones',    desc: 'Configura precios y disponibilidad', color: 'from-blue-50 to-sky-100',     border: 'border-blue-100'  },
-    { icon: '📅', title: 'Reservas',        desc: 'Gestiona las reservas recibidas',  color: 'from-orange-50 to-amber-100',   border: 'border-orange-100'},
+    { icon: '🏨', title: 'Mis hoteles',     desc: 'Gestiona tus alojamientos',          color: 'from-green-50 to-emerald-100',  border: 'border-green-100',  to: '/dashboard/hotels'       },
+    { icon: '🛏️', title: 'Habitaciones',    desc: 'Configura precios y disponibilidad', color: 'from-blue-50 to-sky-100',        border: 'border-blue-100',   to: '/dashboard/rooms'        },
+    { icon: '📅', title: 'Reservas',        desc: 'Gestiona las reservas recibidas',    color: 'from-orange-50 to-amber-100',    border: 'border-orange-100', to: '/dashboard/reservations' },
   ];
 
   const clientCards = [
-    { icon: '🔍', title: 'Explorar',        desc: 'Descubre hoteles rurales',         color: 'from-green-50 to-emerald-100',  border: 'border-green-100' },
-    { icon: '📅', title: 'Mis reservas',    desc: 'Consulta tus estancias',           color: 'from-blue-50 to-sky-100',       border: 'border-blue-100'  },
-    { icon: '❤️', title: 'Favoritos',       desc: 'Tus alojamientos guardados',       color: 'from-rose-50 to-pink-100',      border: 'border-rose-100'  },
+    { icon: '🔍', title: 'Explorar',        desc: 'Descubre hoteles rurales',            color: 'from-green-50 to-emerald-100',  border: 'border-green-100',  to: '/'                       },
+    { icon: '📅', title: 'Mis reservas',    desc: 'Consulta tus estancias',              color: 'from-blue-50 to-sky-100',        border: 'border-blue-100',   to: '/dashboard/reservations' },
+    { icon: '❤️', title: 'Favoritos',       desc: 'Tus alojamientos guardados',          color: 'from-rose-50 to-pink-100',       border: 'border-rose-100',   to: '/'                       },
   ];
 
   const superCards = [
-    { icon: '👥', title: 'Usuarios',        desc: 'Gestión de todos los usuarios',    color: 'from-purple-50 to-violet-100',  border: 'border-purple-100'},
-    { icon: '🏨', title: 'Todos los hoteles', desc: 'Supervisión de alojamientos',    color: 'from-green-50 to-emerald-100',  border: 'border-green-100' },
-    { icon: '📊', title: 'Analytics',       desc: 'Métricas y estadísticas globales', color: 'from-orange-50 to-amber-100',   border: 'border-orange-100'},
+    { icon: '👥', title: 'Usuarios',          desc: 'Gestión de todos los usuarios',    color: 'from-purple-50 to-violet-100',   border: 'border-purple-100', to: '/dashboard'              },
+    { icon: '🏨', title: 'Todos los hoteles', desc: 'Supervisión de alojamientos',      color: 'from-green-50 to-emerald-100',   border: 'border-green-100',  to: '/dashboard/hotels'       },
+    { icon: '📊', title: 'Analytics',         desc: 'Métricas y estadísticas globales', color: 'from-orange-50 to-amber-100',    border: 'border-orange-100', to: '/dashboard'              },
   ];
 
   const cards = isSuperadmin ? superCards : isAdmin ? adminCards : clientCards;
@@ -83,15 +83,20 @@ export default function Dashboard() {
             Bienvenido{user?.name ? `, ${user.name}` : ''} 👋
           </h2>
           <p className="text-gray-400 mt-1 text-sm">
-            {isSuperadmin ? 'Panel de administración global.' : isAdmin ? 'Gestiona tus hoteles, habitaciones y reservas.' : 'Explora alojamientos y consulta tus reservas.'}
+            {isSuperadmin
+              ? 'Panel de administración global.'
+              : isAdmin
+              ? 'Gestiona tus hoteles, habitaciones y reservas.'
+              : 'Explora alojamientos y consulta tus reservas.'}
           </p>
         </div>
 
-        {/* Cards */}
+        {/* Cards ✅ con navegación */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
           {cards.map(card => (
             <div
               key={card.title}
+              onClick={() => navigate(card.to)}
               className={`bg-gradient-to-br ${card.color} border ${card.border} rounded-2xl p-6 hover:shadow-md transition-shadow cursor-pointer group`}
             >
               <div className="text-4xl mb-4">{card.icon}</div>

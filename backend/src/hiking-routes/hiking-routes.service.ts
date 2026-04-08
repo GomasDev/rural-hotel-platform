@@ -19,10 +19,20 @@ export class HikingRoutesService {
     return this.repo.save(route);
   }
 
-  // ── Global (landing) ───────────────────────────────────────────────────────
-  findAll(): Promise<HikingRoute[]> {
-    return this.repo.find({ where: { isActive: true } });
-  }
+// ── Global (landing) ───────────────────────────────────────────────────────
+findAll(): Promise<HikingRoute[]> {
+  return this.repo.find({
+    where: { isActive: true },
+    relations: { hotel: true },
+    select: {
+      id: true, name: true, description: true,
+      difficulty: true, distanceKm: true,
+      durationMinutes: true, elevationGainM: true,
+      images: true, isActive: true,
+      hotel: { id: true, name: true, address: true },
+    },
+  });
+}
 
   // ── Por hotel ──────────────────────────────────────────────────────────────
   findAllByHotel(hotelId: string): Promise<HikingRoute[]> {

@@ -32,7 +32,7 @@ interface Restaurant {
   priceRange?: string;
   rating?: number;
   images: string[];
-  hotel?: { name: string; address: string };
+  hotel?: { id: string; name: string; address: string };
 }
 
 interface HikingRoute {
@@ -44,7 +44,7 @@ interface HikingRoute {
   durationMinutes?: number;
   elevationGainM?: number;
   images: string[];
-  hotel?: { name: string; address: string };
+  hotel?: { id: string; name: string; address: string };
 }
 
 type Category = 'hoteles' | 'rutas' | 'restaurantes';
@@ -111,8 +111,8 @@ export default function LandingPage() {
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
   const [loadingRoutes,      setLoadingRoutes]      = useState(true);
 
-  const [activeCategory, setActive]   = useState<Category>('hoteles');
-  const [searchInput,    setSearch]   = useState('');
+  const [activeCategory, setActive] = useState<Category>('hoteles');
+  const [searchInput,    setSearch] = useState('');
 
   const API = import.meta.env.VITE_API_URL;
 
@@ -136,7 +136,6 @@ export default function LandingPage() {
       .finally(() => setLoadingRoutes(false));
   }, []);
 
-  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -167,7 +166,6 @@ export default function LandingPage() {
             Todo en un mismo lugar.
           </p>
 
-          {/* Buscador */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl md:rounded-full shadow-lg border border-gray-100 overflow-hidden max-w-2xl mx-auto">
             <div className="flex-1 flex items-center gap-3 px-5 py-3.5 md:border-r border-gray-100">
               <IconSearch />
@@ -195,33 +193,20 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Stats reales */}
           <div className="flex items-center justify-center gap-8 mt-10 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <span className="text-xl">🏨</span>
-              <span>
-                <strong className="text-gray-800">
-                  {loadingHotels ? '…' : hotels.length}
-                </strong> hoteles
-              </span>
+              <span><strong className="text-gray-800">{loadingHotels ? '…' : hotels.length}</strong> hoteles</span>
             </div>
             <div className="w-px h-4 bg-gray-300" />
             <div className="flex items-center gap-2">
               <span className="text-xl">⛰️</span>
-              <span>
-                <strong className="text-gray-800">
-                  {loadingRoutes ? '…' : hikingRoutes.length}
-                </strong> rutas
-              </span>
+              <span><strong className="text-gray-800">{loadingRoutes ? '…' : hikingRoutes.length}</strong> rutas</span>
             </div>
             <div className="w-px h-4 bg-gray-300" />
             <div className="flex items-center gap-2">
               <span className="text-xl">🍽️</span>
-              <span>
-                <strong className="text-gray-800">
-                  {loadingRestaurants ? '…' : restaurants.length}
-                </strong> restaurantes
-              </span>
+              <span><strong className="text-gray-800">{loadingRestaurants ? '…' : restaurants.length}</strong> restaurantes</span>
             </div>
           </div>
         </div>
@@ -295,7 +280,12 @@ export default function LandingPage() {
                 const numRooms  = hotel.rooms?.length ?? 0;
 
                 return (
-                  <div key={hotel.id} onClick={() => navigate('/login')} className="group cursor-pointer">
+                  <div
+                    key={hotel.id}
+                    // ✅ Navega al detalle del hotel
+                    onClick={() => navigate(`/hotels/${hotel.id}`)}
+                    className="group cursor-pointer"
+                  >
                     <div className="relative h-52 bg-gradient-to-br from-green-100 to-emerald-200 rounded-2xl overflow-hidden mb-3">
                       {hotel.images?.[0] ? (
                         <img
@@ -376,7 +366,7 @@ export default function LandingPage() {
               {hikingRoutes.map(route => (
                 <div
                   key={route.id}
-                  onClick={() => navigate('/login')}
+                  onClick={() => route.hotel?.id ? navigate(`/hotels/${route.hotel.id}`) : undefined}
                   className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="relative h-44 overflow-hidden">
@@ -414,9 +404,7 @@ export default function LandingPage() {
                         <IconDistance /> {route.distanceKm} km
                       </span>
                       {route.elevationGainM && (
-                        <span className="flex items-center gap-1">
-                          ↑ {route.elevationGainM}m
-                        </span>
+                        <span>↑ {route.elevationGainM}m</span>
                       )}
                     </div>
                   </div>
@@ -454,7 +442,7 @@ export default function LandingPage() {
               {restaurants.map(rest => (
                 <div
                   key={rest.id}
-                  onClick={() => navigate('/login')}
+                  onClick={() => rest.hotel?.id ? navigate(`/hotels/${rest.hotel.id}`) : undefined}
                   className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="relative h-44 overflow-hidden">

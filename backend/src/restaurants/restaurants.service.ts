@@ -22,9 +22,18 @@ export class RestaurantsService {
   }
 
   // ── Global (landing) ───────────────────────────────────────────────────────
-  findAll(): Promise<Restaurant[]> {
-    return this.repo.find({ where: { isActive: true } });
-  }
+findAll(): Promise<Restaurant[]> {
+  return this.repo.find({
+    where: { isActive: true },
+    relations: { hotel: true },
+    select: {
+      id: true, name: true, description: true,
+      cuisineType: true, priceRange: true, rating: true,
+      images: true, isActive: true,
+      hotel: { id: true, name: true, address: true },
+    },
+  });
+}
 
   // ── Por hotel ──────────────────────────────────────────────────────────────
   findAllByHotel(hotelId: string): Promise<Restaurant[]> {
