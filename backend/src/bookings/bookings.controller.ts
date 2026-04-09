@@ -22,6 +22,11 @@ export class BookingsController {
     return this.bookingsService.findByUser(req.user.userId);
     }
 
+    @Get('room/:roomId')
+    findByRoom(@Param('roomId') roomId: string) {
+    return this.bookingsService.findByRoom(roomId);
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string, @Request() req: any) {
     return this.bookingsService.findOne(id, req.user.userId);

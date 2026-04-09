@@ -19,6 +19,7 @@ const hotels_module_1 = require("./hotels/hotels.module");
 const hiking_routes_module_1 = require("./hiking-routes/hiking-routes.module");
 const restaurants_module_1 = require("./restaurants/restaurants.module");
 const bookings_module_1 = require("./bookings/bookings.module");
+const activities_module_1 = require("./activities/activities.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -50,7 +51,8 @@ exports.AppModule = AppModule = __decorate([
             rooms_module_1.RoomsModule,
             restaurants_module_1.RestaurantsModule,
             hiking_routes_module_1.HikingRoutesModule,
-            bookings_module_1.BookingsModule,],
+            bookings_module_1.BookingsModule,
+            activities_module_1.ActivitiesModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

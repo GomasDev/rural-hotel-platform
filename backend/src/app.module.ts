@@ -10,6 +10,7 @@ import { HotelsModule } from './hotels/hotels.module';
 import { HikingRoutesModule } from './hiking-routes/hiking-routes.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -39,6 +40,7 @@ import { BookingsModule } from './bookings/bookings.module';
   RestaurantsModule,
   HikingRoutesModule,
   BookingsModule,
+  ActivitiesModule
 ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { checkAuth } = useAuth(); // ← Para actualizar contexto
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const { checkAuth } = useAuth();
+
+  const from = (location.state as any)?.from ?? '/dashboard';
+
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,16 +36,11 @@ export default function Login() {
         return;
       }
 
-      // ✅ Guarda el token
-
-      
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // ✅ Actualiza contexto + navega SIN recarga
+
       checkAuth();
-      navigate('/dashboard', { replace: true });
-      
+      navigate(from, { replace: true });
     } catch {
       setError('No se pudo conectar con el servidor');
     } finally {
@@ -53,11 +48,10 @@ export default function Login() {
     }
   };
 
-
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
+
         {/* Header */}
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Iniciar sesión</h2>
         <p className="text-gray-400 mb-4 text-sm text-center">
@@ -67,9 +61,20 @@ export default function Login() {
           </Link>
         </p>
 
-        <button onClick={() => navigate('/')} className="text-green-700 hover:underline bg-transparent border-none p-0 text-sm mx-auto block mb-4">
+        <button
+          onClick={() => navigate('/')}
+          className="text-green-700 hover:underline bg-transparent border-none p-0 text-sm mx-auto block mb-4"
+        >
           Inicio
         </button>
+
+        {/* Banner contextual — visible si viene de reservar */}
+        {from === '/dashboard/rooms' && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2 text-sm text-amber-800">
+            <span>🔒</span>
+            <span>Inicia sesión para completar tu reserva</span>
+          </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -98,7 +103,6 @@ export default function Login() {
             required
             className="border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
-
           <button
             type="submit"
             disabled={loading}

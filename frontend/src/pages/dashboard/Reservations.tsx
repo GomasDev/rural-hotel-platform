@@ -121,7 +121,7 @@ export default function Reservations() {
           <p className="text-gray-400 text-sm mt-0.5">{bookings.length} reserva{bookings.length !== 1 ? 's' : ''} en total</p>
         </div>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard/rooms')}
           className="px-4 py-2 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-full transition-colors"
         >
           + Nueva reserva
@@ -171,12 +171,12 @@ export default function Reservations() {
               : `No tienes reservas con estado "${STATUS_LABEL[filter]}".`}
           </p>
           {filter === 'all' && (
-            <button
-              onClick={() => navigate('/')}
-              className="px-6 py-2.5 bg-green-700 text-white rounded-full text-sm font-semibold hover:bg-green-800 transition"
-            >
-              Explorar hoteles
-            </button>
+          <button
+            onClick={() => navigate('/dashboard/rooms')}
+            className="px-6 py-2.5 bg-green-700 text-white rounded-full text-sm font-semibold hover:bg-green-800 transition"
+          >
+            Ver habitaciones
+          </button>
           )}
         </div>
       ) : (

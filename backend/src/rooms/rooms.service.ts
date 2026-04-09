@@ -116,4 +116,18 @@ export class RoomsService {
     }
     return booking.status;
   }
+
+  async getOccupiedDates(roomId: string): Promise<{ checkIn: string; checkOut: string }[]> {
+    const bookings = await this.bookingRepository.find({
+      where: [
+        { roomId, status: BookingStatus.Pending },
+        { roomId, status: BookingStatus.Confirmed },
+      ],
+      select: ['checkIn', 'checkOut'],
+    });
+    return bookings.map(b => ({
+      checkIn:  String(b.checkIn).split('T')[0],
+      checkOut: String(b.checkOut).split('T')[0],
+    }));
+  } 
 }

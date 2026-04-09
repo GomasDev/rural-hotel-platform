@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import BookingModal from '../../components/BookingModal';
 
 interface Hotel { id: string; name: string; address: string; }
@@ -10,6 +12,9 @@ interface Room {
 }
 
 export default function Rooms() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   const [hotels, setHotels]               = useState<Hotel[]>([]);
   const [selectedHotel, setSelectedHotel] = useState<string>('all');
   const [rooms, setRooms]                 = useState<Room[]>([]);
@@ -20,7 +25,13 @@ export default function Rooms() {
   // ── BookingModal ───────────────────────────────────────────────────────────
   const [bookingModal, setBookingModal] = useState<{ open: boolean; room?: Room }>({ open: false });
 
-  const openBooking = (room: Room) => setBookingModal({ open: true, room });
+  const openBooking = (room: Room) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/dashboard/rooms' } });
+      return;
+    }
+    setBookingModal({ open: true, room });
+  };
   const closeBooking = () => setBookingModal({ open: false });
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -106,6 +117,24 @@ export default function Rooms() {
 
         {error && <p className="text-red-500 text-sm mb-4 bg-red-50 px-4 py-2 rounded-xl">{error}</p>}
 
+        {/* Banner login — visible solo si no hay sesión */}
+        {!isAuthenticated && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🔒</span>
+              <p className="text-sm text-amber-800 font-medium">
+                Inicia sesión para poder realizar una reserva
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/login', { state: { from: '/dashboard/rooms' } })}
+              className="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-full transition-colors"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        )}
+
         {/* Grid */}
         {loadingRooms ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -164,7 +193,6 @@ export default function Rooms() {
                       </span>
                     </div>
 
-                    {/* ✅ Botón reservar */}
                     <button
                       onClick={() => openBooking(room)}
                       disabled={!room.isAvailable}
@@ -174,7 +202,9 @@ export default function Rooms() {
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      {room.isAvailable ? 'Reservar' : 'No disponible'}
+                      {room.isAvailable
+                        ? isAuthenticated ? 'Reservar' : '🔒 Reservar'
+                        : 'No disponible'}
                     </button>
                   </div>
                 </div>
@@ -184,7 +214,6 @@ export default function Rooms() {
         )}
       </div>
 
-      {/* ── BookingModal ✅ ──────────────────────────────────────────────── */}
       {bookingModal.open && bookingModal.room && (
         <BookingModal
           room={{
@@ -198,7 +227,6 @@ export default function Rooms() {
           onSuccess={closeBooking}
         />
       )}
-      {/* ──────────────────────────────────────────────────────────────── */}
     </>
   );
 }

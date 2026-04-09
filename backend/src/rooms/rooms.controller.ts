@@ -39,6 +39,11 @@ export class RoomsController {
     return this.roomsService.findAvailable(hotelId, checkIn, checkOut);
   }
 
+  @Get(':id/occupied-dates')
+  getOccupiedDates(@Param('id') id: string) {
+    return this.roomsService.getOccupiedDates(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roomsService.findOne(id);

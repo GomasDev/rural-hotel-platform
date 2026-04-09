@@ -20,6 +20,8 @@ import DashboardLayout  from './components/layouts/DashboardLayout'
 import { AuthProvider } from './context/AuthContext'
 
 import './App.css'
+import HikingRoutes from './pages/dashboard/HikingRoutes'
+import Activities from './pages/dashboard/Activities'
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
           <Route path="/reset-password"        element={<ResetPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+
           {/* ── Dashboard (protegido) ── */}
           <Route path="/dashboard/*" element={
             <ProtectedRoute element={<DashboardLayout />} />
@@ -43,6 +46,8 @@ function App() {
             <Route path="hotels"       element={<Hotels />} />
             <Route path="rooms"        element={<Rooms />} />
             <Route path="reservations" element={<Reservations />} />
+            <Route path="hiking-routes" element={<HikingRoutes />} />
+            <Route path="activities" element={<Activities />} />
           </Route>
         </Routes>
       </BrowserRouter>

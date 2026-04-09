@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import RoomCalendar from './RoomCalendar';
@@ -30,7 +30,6 @@ type Step = 'form' | 'payment' | 'done';
 
 export default function BookingModal({ room, hotelName, onClose, onSuccess }: Props) {
   const { isAuthenticated } = useAuth();
-  const token    = localStorage.getItem('access_token');
   const navigate = useNavigate();
   const API      = import.meta.env.VITE_API_URL;
 
@@ -45,18 +44,30 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
   const [expiry,     setExpiry]     = useState('');
   const [cvv,        setCvv]        = useState('');
 
-  const [step,       setStep]       = useState<Step>('form');
-  const [loading,    setLoading]    = useState(false);
-  const [error,      setError]      = useState('');
+  const [step,    setStep]    = useState<Step>('form');
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState('');
 
-  const nights      = range ? nightCount(range[0], range[1]) : 0;
-  const priceNight  = parseFloat(room.pricePerNight);
-  const totalPrice  = (nights * priceNight).toFixed(2);
+  const nights     = range ? nightCount(range[0], range[1]) : 0;
+  const priceNight = parseFloat(room.pricePerNight);
+  const totalPrice = (nights * priceNight).toFixed(2);
+
+  // ✅ Si pierde la sesión con el modal abierto, cierra
+  useEffect(() => {
+    if (!isAuthenticated) onClose();
+  }, [isAuthenticated]);
+
+  // ✅ Helper — token fresco en cada acción
+  const getToken = (): string | null => localStorage.getItem('access_token');
 
   function handleGoPayment(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!isAuthenticated || !token) { navigate('/login'); return; }
+    const token = getToken();
+    if (!isAuthenticated || !token) {
+      navigate('/login', { state: { from: '/dashboard/rooms' } });
+      return;
+    }
     if (!range || nights <= 0) { setError('Selecciona fechas de entrada y salida'); return; }
     if (guests > room.capacity) { setError(`Capacidad máxima: ${room.capacity} personas`); return; }
     setStep('payment');
@@ -65,6 +76,11 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
   async function handlePayment(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    const token = getToken();
+    if (!isAuthenticated || !token) {
+      navigate('/login', { state: { from: '/dashboard/rooms' } });
+      return;
+    }
     if (cardNumber.replace(/\s/g,'').length < 16) { setError('Número de tarjeta inválido'); return; }
     if (!cardName.trim())  { setError('Introduce el nombre del titular'); return; }
     if (expiry.length < 5) { setError('Fecha de caducidad inválida'); return; }
@@ -75,9 +91,9 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
       await new Promise(r => setTimeout(r, 1200));
       const res = await fetch(`${API}/bookings`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          roomId: room.id,
+          roomId:   room.id,
           checkIn:  toStr(range![0]),
           checkOut: toStr(range![1]),
           guests,
@@ -108,9 +124,9 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
         <div className="flex items-start justify-between p-5 border-b border-gray-100 shrink-0">
           <div>
             <h2 className="font-bold text-gray-900 text-base">
-              {step === 'form' && 'Selecciona fechas'}
+              {step === 'form'    && 'Selecciona fechas'}
               {step === 'payment' && 'Pago seguro'}
-              {step === 'done' && '¡Reserva confirmada!'}
+              {step === 'done'    && '¡Reserva confirmada!'}
             </h2>
             <p className="text-xs text-gray-400 mt-0.5">{hotelName} · {room.name}</p>
           </div>
@@ -121,7 +137,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
           )}
         </div>
 
-        {/* Scroll area */}
         <div className="overflow-y-auto flex-1">
 
           {/* ── DONE ── */}
@@ -140,17 +155,9 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
           {/* ── FORM ── */}
           {step === 'form' && (
             <form onSubmit={handleGoPayment} className="p-5 space-y-4">
-
-              {/* Calendario */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  Disponibilidad
-                </p>
-                <RoomCalendar
-                  roomId={room.id}
-                  value={range}
-                  onChange={setRange}
-                />
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Disponibilidad</p>
+                <RoomCalendar roomId={room.id} value={range} onChange={setRange} />
                 {range && nights > 0 && (
                   <p className="text-xs text-center text-gray-500 mt-2">
                     📅 {toStr(range[0])} → {toStr(range[1])} · <strong>{nights} {nights === 1 ? 'noche' : 'noches'}</strong>
@@ -158,7 +165,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
                 )}
               </div>
 
-              {/* Huéspedes */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
                   Huéspedes (máx. {room.capacity})
@@ -172,7 +178,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
                 </div>
               </div>
 
-              {/* Resumen */}
               <div className="bg-gray-50 rounded-2xl p-4 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span>{priceNight}€ × {nights} {nights === 1 ? 'noche' : 'noches'}</span>
@@ -189,12 +194,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
                 className="w-full py-3.5 bg-green-700 hover:bg-green-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold rounded-2xl transition-colors">
                 Ir al pago · {totalPrice}€
               </button>
-
-              {!isAuthenticated && (
-                <p className="text-center text-xs text-gray-400">
-                  Necesitas <button type="button" onClick={() => navigate('/login')} className="underline text-green-700">iniciar sesión</button> para reservar
-                </p>
-              )}
             </form>
           )}
 
@@ -202,7 +201,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
           {step === 'payment' && (
             <form onSubmit={handlePayment} className="p-5 space-y-4">
 
-              {/* Resumen compacto */}
               <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 flex items-center justify-between text-sm">
                 <span className="text-gray-600">
                   {nights} {nights === 1 ? 'noche' : 'noches'} · {guests} {guests === 1 ? 'huésped' : 'huéspedes'}
@@ -233,7 +231,6 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
                 </div>
               </div>
 
-              {/* Número */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
                   <span className="flex items-center gap-1.5"><IconCard /> Número de tarjeta</span>
@@ -245,31 +242,26 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
                 />
               </div>
 
-              {/* Nombre */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Nombre del titular</label>
                 <input type="text" placeholder="Como aparece en la tarjeta"
-                  value={cardName}
-                  onChange={e => setCardName(e.target.value.toUpperCase())} required
+                  value={cardName} onChange={e => setCardName(e.target.value.toUpperCase())} required
                   className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 />
               </div>
 
-              {/* Caducidad + CVV */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Caducidad</label>
                   <input type="text" inputMode="numeric" placeholder="MM/AA"
-                    value={expiry} maxLength={5}
-                    onChange={e => setExpiry(fmtExp(e.target.value))} required
+                    value={expiry} maxLength={5} onChange={e => setExpiry(fmtExp(e.target.value))} required
                     className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 font-mono"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">CVV</label>
                   <input type="password" inputMode="numeric" placeholder="•••"
-                    value={cvv} maxLength={4}
-                    onChange={e => setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} required
+                    value={cvv} maxLength={4} onChange={e => setCvv(e.target.value.replace(/\D/g,'').slice(0,4))} required
                     className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 font-mono"
                   />
                 </div>

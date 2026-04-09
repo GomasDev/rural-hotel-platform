@@ -53,6 +53,15 @@ export class BookingsService {
     return this.bookingRepo.save(booking);
   }
 
+  // ── Por habitación (admin) ─────────────────────────────────────────────────
+    findByRoom(roomId: string): Promise<Booking[]> {
+    return this.bookingRepo.find({
+        where: { roomId },
+        relations: { room: true },
+        order: { checkIn: 'ASC' },
+    });
+    }
+
   // ── Mis reservas ───────────────────────────────────────────────────────────
   findByUser(userId: string): Promise<Booking[]> {
     return this.bookingRepo.find({
