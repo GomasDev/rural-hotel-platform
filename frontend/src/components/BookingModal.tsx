@@ -52,13 +52,15 @@ export default function BookingModal({ room, hotelName, onClose, onSuccess }: Pr
   const priceNight = parseFloat(room.pricePerNight);
   const totalPrice = (nights * priceNight).toFixed(2);
 
-  // ✅ Si pierde la sesión con el modal abierto, cierra
+  //  Bloquea el modal si no hay sesión — tanto al montar como si se pierde
   useEffect(() => {
-    if (!isAuthenticated) onClose();
+    if (!isAuthenticated) {
+      onClose();
+      navigate('/login');
+    }
   }, [isAuthenticated]);
 
-  // ✅ Helper — token fresco en cada acción
-  const getToken = (): string | null => localStorage.getItem('access_token');
+  const getToken = (): string | null => sessionStorage.getItem('access_token');
 
   function handleGoPayment(e: React.FormEvent) {
     e.preventDefault();

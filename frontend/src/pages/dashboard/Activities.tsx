@@ -62,7 +62,7 @@ const EMPTY_FORM: ActivityForm = {
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('access_token');
   const res = await fetch(`${API}${path}`, {
     ...options,
     headers: {

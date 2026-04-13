@@ -90,7 +90,7 @@ export default function Hotels() {
   const toggleWeather = (id: string) =>
     setWeatherOpen(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const token = localStorage.getItem('access_token');
+  const token = sessionStorage.getItem('access_token');
 
   useEffect(() => {
     setLoading(true); setError(null);

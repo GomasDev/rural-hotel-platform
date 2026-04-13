@@ -7,7 +7,7 @@ export default function Login() {
   const location = useLocation();
   const { checkAuth } = useAuth();
 
-  const from = (location.state as any)?.from ?? '/dashboard';
+  const from = (location.state as any)?.from ?? null;
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError]       = useState('');
@@ -36,11 +36,19 @@ export default function Login() {
         return;
       }
 
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
+      sessionStorage.setItem('access_token', data.access_token);
+      sessionStorage.setItem('user', JSON.stringify(data.user));
       checkAuth();
-      navigate(from, { replace: true });
+
+      // Si venía de un hotel a reservar → volver ahí
+      if (from && from !== '/login' && from !== '/register') {
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // Sin from → siempre al dashboard (todos los roles)
+      navigate('/dashboard', { replace: true });
+
     } catch {
       setError('No se pudo conectar con el servidor');
     } finally {
@@ -48,11 +56,15 @@ export default function Login() {
     }
   };
 
+  // Banner contextual según de dónde viene
+  const showReservaBanner = from && (
+    String(from).includes('/hotels/') || String(from).includes('/rooms')
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
 
-        {/* Header */}
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Iniciar sesión</h2>
         <p className="text-gray-400 mb-4 text-sm text-center">
           ¿No tienes cuenta?{' '}
@@ -68,22 +80,20 @@ export default function Login() {
           Inicio
         </button>
 
-        {/* Banner contextual — visible si viene de reservar */}
-        {from === '/dashboard/rooms' && (
+        {/* Banner — visible si viene de reservar */}
+        {showReservaBanner && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2 text-sm text-amber-800">
             <span>🔒</span>
             <span>Inicia sesión para completar tu reserva</span>
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"

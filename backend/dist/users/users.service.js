@@ -31,8 +31,24 @@ let UsersService = class UsersService {
     }
     async findAll() {
         return this.usersRepository.find({
-            select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role']
+            select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role'],
         });
+    }
+    async findById(id) {
+        const user = await this.usersRepository.findOne({ where: { id } });
+        if (!user)
+            throw new common_1.NotFoundException(`Usuario ${id} no encontrado`);
+        return user;
+    }
+    async updateRole(id, role) {
+        const user = await this.findById(id);
+        user.role = role;
+        return this.usersRepository.save(user);
+    }
+    async remove(id) {
+        const user = await this.findById(id);
+        await this.usersRepository.remove(user);
+        return { message: `Usuario ${id} eliminado correctamente` };
     }
     async updateResetToken(id, token, expires) {
         await this.usersRepository.update(id, {

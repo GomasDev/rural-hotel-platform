@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import BookingModal from '../../components/BookingModal'; // ✅ añadido
+import BookingModal from '../../components/BookingModal';
+import WeatherWidget from '../../components/WeatherWidget';
+import { useAuth } from '../../context/AuthContext';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 interface Room {
@@ -13,7 +15,6 @@ interface Room {
   isAvailable: boolean;
   images: string[];
 }
-
 interface Restaurant {
   id: string;
   name: string;
@@ -23,7 +24,6 @@ interface Restaurant {
   rating?: number;
   images: string[];
 }
-
 interface HikingRoute {
   id: string;
   name: string;
@@ -34,19 +34,20 @@ interface HikingRoute {
   elevationGainM?: number;
   images: string[];
 }
+type GeoLocation = string | { type: string; coordinates: [number, number] };
 
 interface Hotel {
   id: string;
   name: string;
   description?: string;
   address: string;
+  location?: GeoLocation;
   phone?: string;
   email?: string;
   images: string[];
   isActive: boolean;
   rooms?: Room[];
 }
-
 type Tab = 'habitaciones' | 'restaurantes' | 'rutas';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   medium: 'bg-yellow-100 text-yellow-700',
   high:   'bg-red-100 text-red-600',
 };
+
 function formatDuration(minutes?: number): string {
   if (!minutes) return '—';
   const h = Math.floor(minutes / 60);
@@ -65,14 +67,27 @@ function formatDuration(minutes?: number): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
+const parseCoords = (loc?: GeoLocation): [number, number] | null => {
+  if (!loc) return null;
+
+  if (typeof loc === 'string') {
+    const p = loc.split(',').map(s => parseFloat(s.trim()));
+    return p.length === 2 && !isNaN(p[0]) && !isNaN(p[1]) ? [p[0], p[1]] : null;
+  }
+
+  return loc.coordinates?.length === 2
+    ? [loc.coordinates[1], loc.coordinates[0]]
+    : null;
+};
+
 // ── Iconos ────────────────────────────────────────────────────────────────────
-const IconBack     = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>;
-const IconPin      = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const IconPhone    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 5a2 2 0 0 1 1.93-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 10.4a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
-const IconMail     = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>;
-const IconStar     = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="#111827" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
-const IconClock    = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const IconPeople   = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const IconBack   = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>;
+const IconPin    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const IconPhone  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 5a2 2 0 0 1 1.93-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 10.4a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+const IconMail   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>;
+const IconStar   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="#111827" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+const IconClock  = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+const IconPeople = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 function Skeleton({ className }: { className: string }) {
@@ -81,9 +96,11 @@ function Skeleton({ className }: { className: string }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function HotelDetail() {
-  const { id }   = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const API      = import.meta.env.VITE_API_URL;
+  const { id }     = useParams<{ id: string }>();
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const API        = import.meta.env.VITE_API_URL;
+  const { isAuthenticated } = useAuth();
 
   const [hotel,        setHotel]        = useState<Hotel | null>(null);
   const [restaurants,  setRestaurants]  = useState<Restaurant[]>([]);
@@ -91,12 +108,12 @@ export default function HotelDetail() {
   const [loading,      setLoading]      = useState(true);
   const [activeImg,    setActiveImg]    = useState(0);
   const [activeTab,    setActiveTab]    = useState<Tab>('habitaciones');
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null); // ✅ añadido
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
+  // ── Fetch principal ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-
     Promise.all([
       fetch(`${API}/hotels/${id}`).then(r => r.json()),
       fetch(`${API}/hotels/${id}/restaurants`).then(r => r.json()),
@@ -111,7 +128,31 @@ export default function HotelDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // ── Loading ────────────────────────────────────────────────────────────────
+  // ── Reabrir modal si vuelve del login con roomId ───────────────────────────
+  useEffect(() => {
+    const roomId = (location.state as any)?.roomId;
+    if (!roomId || !hotel?.rooms?.length || !isAuthenticated) return;
+
+    const room = hotel.rooms.find(r => r.id === roomId);
+    if (room?.isAvailable) {
+      setSelectedRoom(room);
+    }
+  }, [hotel, isAuthenticated, location.state]);
+
+  // ── Protección de reserva ──────────────────────────────────────────────────
+  const handleReservar = (room: Room) => {
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: {
+          from: location.pathname,
+          roomId: room.id,
+        },
+      });
+      return;
+    }
+    setSelectedRoom(room);
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -126,7 +167,6 @@ export default function HotelDetail() {
     </div>
   );
 
-  // ── Not found ──────────────────────────────────────────────────────────────
   if (!hotel) return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -145,8 +185,8 @@ export default function HotelDetail() {
   const minPrice = rooms.length
     ? Math.min(...rooms.map(r => parseFloat(r.pricePerNight)))
     : null;
+  const coords = parseCoords(hotel.location);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -179,11 +219,7 @@ export default function HotelDetail() {
                   activeImg === i + 1 ? 'ring-2 ring-green-500 ring-inset' : ''
                 }`}
               >
-                <img
-                  src={img}
-                  alt={`${hotel.name} ${i + 2}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
+                <img src={img} alt={`${hotel.name} ${i + 2}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
               </div>
             ))}
             {Array.from({ length: Math.max(0, 4 - (images.length - 1)) }).map((_, i) => (
@@ -207,8 +243,18 @@ export default function HotelDetail() {
               {hotel.phone && <span className="flex items-center gap-1.5"><IconPhone /> {hotel.phone}</span>}
               {hotel.email && <span className="flex items-center gap-1.5"><IconMail /> {hotel.email}</span>}
             </div>
+
             {hotel.description && (
               <p className="text-gray-600 text-sm leading-relaxed max-w-2xl">{hotel.description}</p>
+            )}
+
+            {coords && (
+              <div className="mt-5">
+                <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-2">
+                  🌤️ Previsión del tiempo — 7 días
+                </p>
+                <WeatherWidget lat={coords[0]} lng={coords[1]} forecastDays={7} />
+              </div>
             )}
           </div>
 
@@ -223,16 +269,15 @@ export default function HotelDetail() {
             ) : (
               <p className="text-sm text-gray-400 mb-4">Consultar precio</p>
             )}
-            {/* ✅ Abre el modal con la habitación más barata disponible */}
             <button
               onClick={() => {
                 const available = rooms.find(r => r.isAvailable);
-                if (available) setSelectedRoom(available);
+                if (available) handleReservar(available);
               }}
               disabled={!rooms.some(r => r.isAvailable)}
               className="w-full px-4 py-2.5 bg-green-700 hover:bg-green-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
             >
-              Reservar ahora
+              {isAuthenticated ? 'Reservar ahora' : 'Inicia sesión para reservar'}
             </button>
             <p className="text-xs text-gray-400 mt-2">Sin cargos adicionales</p>
           </div>
@@ -275,10 +320,7 @@ export default function HotelDetail() {
                 <p className="text-gray-500 font-medium">No hay habitaciones disponibles</p>
               </div>
             ) : rooms.map(room => (
-              <div
-                key={room.id}
-                className="flex flex-col md:flex-row gap-5 border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
-              >
+              <div key={room.id} className="flex flex-col md:flex-row gap-5 border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
                 <div className="md:w-56 h-44 md:h-auto shrink-0 bg-gradient-to-br from-green-100 to-emerald-200 overflow-hidden">
                   {room.images?.[0] ? (
                     <img src={room.images[0]} alt={room.name} loading="lazy" className="w-full h-full object-cover" />
@@ -288,7 +330,6 @@ export default function HotelDetail() {
                     </div>
                   )}
                 </div>
-
                 <div className="flex-1 p-5 flex flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between gap-4 mb-2">
@@ -306,7 +347,6 @@ export default function HotelDetail() {
                       <IconPeople /> {room.capacity} {room.capacity === 1 ? 'persona' : 'personas'}
                     </span>
                   </div>
-
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     <div>
                       <span className="text-2xl font-bold text-gray-900">
@@ -314,9 +354,8 @@ export default function HotelDetail() {
                       </span>
                       <span className="text-xs text-gray-400 ml-1">/noche</span>
                     </div>
-                    {/* ✅ Abre el modal con esta habitación */}
                     <button
-                      onClick={() => setSelectedRoom(room)}
+                      onClick={() => handleReservar(room)}
                       disabled={!room.isAvailable}
                       className="px-5 py-2 bg-green-700 hover:bg-green-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
                     >
@@ -345,9 +384,7 @@ export default function HotelDetail() {
                       {rest.images?.[0] ? (
                         <img src={rest.images[0]} alt={rest.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-6xl">🍽️</span>
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">🍽️</span></div>
                       )}
                     </div>
                     <div className="p-4">
@@ -359,9 +396,7 @@ export default function HotelDetail() {
                           </span>
                         )}
                       </div>
-                      {rest.description && (
-                        <p className="text-xs text-gray-400 mb-3 line-clamp-2">{rest.description}</p>
-                      )}
+                      {rest.description && <p className="text-xs text-gray-400 mb-3 line-clamp-2">{rest.description}</p>}
                       <div className="flex items-center justify-between text-xs pt-3 border-t border-gray-100">
                         <span className="text-gray-500">{rest.cuisineType ?? '—'}</span>
                         {rest.priceRange && <span className="font-semibold text-gray-800">{rest.priceRange}</span>}
@@ -390,9 +425,7 @@ export default function HotelDetail() {
                       {route.images?.[0] ? (
                         <img src={route.images[0]} alt={route.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-6xl">⛰️</span>
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">⛰️</span></div>
                       )}
                       <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${DIFFICULTY_COLOR[route.difficulty]}`}>
                         {DIFFICULTY_LABEL[route.difficulty]}
@@ -400,9 +433,7 @@ export default function HotelDetail() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 mb-1 leading-snug">{route.name}</h3>
-                      {route.description && (
-                        <p className="text-xs text-gray-400 mb-3 line-clamp-2">{route.description}</p>
-                      )}
+                      {route.description && <p className="text-xs text-gray-400 mb-3 line-clamp-2">{route.description}</p>}
                       <div className="flex items-center gap-4 text-xs text-gray-500 pt-3 border-t border-gray-100">
                         <span className="flex items-center gap-1.5"><IconClock /> {formatDuration(route.durationMinutes)}</span>
                         <span>{route.distanceKm} km</span>
@@ -429,7 +460,7 @@ export default function HotelDetail() {
         </div>
       </footer>
 
-      {/* ✅ Modal de reserva */}
+      {/* Modal de reserva — solo se monta si hay sesión */}
       {selectedRoom && hotel && (
         <BookingModal
           room={selectedRoom}

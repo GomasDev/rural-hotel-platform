@@ -11,29 +11,50 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  // bookings.controller.ts
-    @Post()
-    create(@Request() req: any, @Body() dto: CreateBookingDto) {
+  @Post()
+  create(@Request() req: any, @Body() dto: CreateBookingDto) {
     return this.bookingsService.create(req.user.userId, dto);
-    }
+  }
 
-    @Get()
-    findMine(@Request() req: any) {
+  @Get()
+  findMine(@Request() req: any) {
     return this.bookingsService.findByUser(req.user.userId);
-    }
+  }
 
-    @Get('room/:roomId')
-    findByRoom(@Param('roomId') roomId: string) {
-    return this.bookingsService.findByRoom(roomId);
-    }
+  @Get('room/:roomId')
+  findByRoom(@Param('roomId') roomId: string, @Request() req: any) {
+    return this.bookingsService.findByRoom(
+      roomId,
+      req.user.userId,
+      req.user.role,
+    );
+  }
 
-    @Get(':id')
-    findOne(@Param('id') id: string, @Request() req: any) {
-    return this.bookingsService.findOne(id, req.user.userId);
-    }
+  @Get(':id')
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.bookingsService.findOne(
+      id,
+      req.user.userId,
+      req.user.role,
+    );
+  }
 
-    @Patch(':id/cancel')
-    cancel(@Param('id') id: string, @Request() req: any) {
-    return this.bookingsService.cancel(id, req.user.userId);
-    }
+  @Patch(':id/cancel')
+  cancel(@Param('id') id: string, @Request() req: any) {
+    return this.bookingsService.cancel(
+      id,
+      req.user.userId,
+      req.user.role,
+    );
+  }
+
+  @Patch(':id/confirm')
+  confirm(@Param('id') id: string, @Request() req: any) {
+    return this.bookingsService.confirm(id, req.user.userId, req.user.role);
+  }
+
+  @Patch(':id/complete')
+  complete(@Param('id') id: string, @Request() req: any) {
+    return this.bookingsService.complete(id, req.user.userId, req.user.role);
+}
 }

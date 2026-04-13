@@ -9,13 +9,16 @@ export default function DashboardLayout() {
   const [isOpen, setIsOpen] = useState(false);
 
   const menu = [
-    { icon: '📊', name: 'Dashboard',           path: '/dashboard' },
-    { icon: '🏨', name: 'Hoteles',             path: '/dashboard/hotels' },
-    { icon: '🛏️', name: 'Habitaciones',        path: '/dashboard/rooms' },
-    { icon: '📅', name: 'Reservas',            path: '/dashboard/reservations' },
-    { icon: '🥾', name: 'Rutas senderismo',    path: '/dashboard/hiking-routes' },
-    { icon: '🎯', name: 'Actividades',         path: '/dashboard/activities' },  
-];
+    { icon: '📊', name: 'Dashboard',        path: '/dashboard' },
+    { icon: '🏨', name: 'Hoteles',          path: '/dashboard/hotels' },
+    { icon: '🛏️', name: 'Habitaciones',     path: '/dashboard/rooms' },
+    { icon: '📅', name: 'Reservas',         path: '/dashboard/reservations' },
+    { icon: '🥾', name: 'Rutas senderismo', path: '/dashboard/hiking-routes' },
+    { icon: '🎯', name: 'Actividades',      path: '/dashboard/activities' },
+    ...(user?.role === 'superadmin'
+      ? [{ icon: '👥', name: 'Usuarios', path: '/dashboard/users' }]
+      : []),
+  ];
 
   const isActive = (path: string) =>
     path === '/dashboard'

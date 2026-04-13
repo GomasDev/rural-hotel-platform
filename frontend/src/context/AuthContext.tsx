@@ -17,7 +17,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// ✅ Decodifica el JWT y comprueba si ha expirado
 function isTokenValid(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -32,8 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const checkAuth = () => {
-    const token    = localStorage.getItem('access_token');
-    const userData = localStorage.getItem('user');
+    const token    = sessionStorage.getItem('access_token');
+    const userData = sessionStorage.getItem('user');
 
     if (token && isTokenValid(token)) {
       setIsAuthenticated(true);
@@ -42,9 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         catch { setUser(null); }
       }
     } else {
-      // Token expirado o ausente → limpiar todo
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('access_token');
+      sessionStorage.removeItem('user');
       setIsAuthenticated(false);
       setUser(null);
     }
@@ -52,15 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     checkAuth();
-
-    // ✅ Re-verificar cada minuto por si expira en mitad de la sesión
     const interval = setInterval(checkAuth, 60_000);
     return () => clearInterval(interval);
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
   };

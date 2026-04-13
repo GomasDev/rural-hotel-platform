@@ -63,7 +63,7 @@ export default function Reservations() {
   const { isAuthenticated } = useAuth();
   const navigate            = useNavigate();
   const API                 = import.meta.env.VITE_API_URL;
-  const token               = localStorage.getItem('access_token');
+  const token               = sessionStorage.getItem('access_token');
 
   const [bookings,  setBookings]  = useState<Booking[]>([]);
   const [loading,   setLoading]   = useState(true);
