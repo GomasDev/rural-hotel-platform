@@ -40,7 +40,7 @@ export class HikingRoute {
   @Column({ name: 'duration_minutes', type: 'int', nullable: true })
   durationMinutes?: number | null;
 
-  // ✅ string, NO object
+  // string, NO object
   @Column({
     name: 'route_geom',
     type: 'geometry',

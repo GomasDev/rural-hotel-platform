@@ -8,18 +8,18 @@ export class CreateHikingRouteDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(150)
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
   @IsEnum(Difficulty)
-  difficulty: Difficulty;
+  difficulty!: Difficulty;
 
   @IsNumber()
   @Min(0.1)
-  distanceKm: number;
+  distanceKm!: number;
 
   @IsOptional()
   @IsNumber()
@@ -34,7 +34,7 @@ export class CreateHikingRouteDto {
   // GeoJSON LineString como string WKT, ej: "LINESTRING(lng lat, lng lat, ...)"
   @IsString()
   @IsNotEmpty()
-  routeGeom: string;
+  routeGeom!: string;
 
   @IsOptional()
   @IsUrl()

@@ -69,7 +69,7 @@ export class RoomsService {
 
     const rooms = await this.roomRepository
       .createQueryBuilder('room')
-      .leftJoin('room.bookings', 'res')  // ✅ Simplificado SIN Brackets complejos
+      .leftJoin('room.bookings', 'res')  // Simplificado SIN Brackets complejos
       .where('room.hotelId = :hotelId', { hotelId })
       .andWhere('(res.id IS NULL OR res.status = :cancelled OR res.checkOut < :checkIn OR res.checkIn > :checkOut)', {
         cancelled: 'cancelled',

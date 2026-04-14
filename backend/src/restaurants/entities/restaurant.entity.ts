@@ -28,7 +28,7 @@ export class Restaurant {
   @Column({ type: 'text', nullable: true })
   description?: string | null;
 
-  // ✅ string, NO object — TypeORM recibe/entrega WKT o GeoJSON como string
+  // string, NO object — TypeORM recibe/entrega WKT o GeoJSON como string
   @Column({
     type: 'geography',
     spatialFeatureType: 'Point',

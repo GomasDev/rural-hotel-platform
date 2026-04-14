@@ -69,7 +69,7 @@ describe('Auth & Users (e2e)', () => {
     );
   });
 
-  // ✅ Al terminar: limpia los de test y relanza el seed → DB queda limpia
+  // Al terminar: limpia los de test y relanza el seed → DB queda limpia
   afterAll(async () => {
     await dataSource.query(
       `DELETE FROM users WHERE email = ANY($1::text[])`,
@@ -81,7 +81,7 @@ describe('Auth & Users (e2e)', () => {
     await app.close();
   });
 
-  // ✅ Entre cada test solo borra los efímeros — los persistentes sobreviven
+  // Entre cada test solo borra los efímeros — los persistentes sobreviven
   beforeEach(async () => {
     await dataSource.query(
       `DELETE FROM users WHERE email = ANY($1::text[])`,
@@ -288,7 +288,7 @@ describe('Auth & Users (e2e)', () => {
   let clientToken: string;
   let createdHotelId: string;
 
-  // ✅ Crea usuarios persistentes para los tests de negocio
+  // Crea usuarios persistentes para los tests de negocio
   beforeAll(async () => {
     await request(app.getHttpServer())
       .post('/auth/register')
