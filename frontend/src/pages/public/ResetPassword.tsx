@@ -10,16 +10,17 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const params = useParams<{ token?: string }>();
+
   const [formData, setFormData] = useState<FormData>({
     password: '',
     confirmPassword: '',
   });
+
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isValidToken, setIsValidToken] = useState(false);
   const [token, setToken] = useState('');
 
-  // Extraer token de URL (?token=abc123) o ruta (/reset-password/:token)
   useEffect(() => {
     const urlToken = searchParams.get('token') ?? params.token;
 
@@ -36,14 +37,12 @@ export default function ResetPassword() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Limpiar mensaje si tipando
     if (message) setMessage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validar contraseñas coinciden
+
     if (formData.password !== formData.confirmPassword) {
       setMessage('Las contraseñas no coinciden');
       return;
@@ -61,16 +60,16 @@ export default function ResetPassword() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          token, 
-          newPassword: formData.password 
+        body: JSON.stringify({
+          token,
+          newPassword: formData.password,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || 'Enlace expirado/inválido');
+        setMessage(data.message || 'Enlace expirado o inválido');
         return;
       }
 
@@ -83,64 +82,72 @@ export default function ResetPassword() {
     }
   };
 
-  // Token inválido
   if (!isValidToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center px-4 py-12">
-        <div className="bg-white rounded-3xl shadow-2xl p-12 w-full max-w-md text-center border border-red-200">
-          <div className="w-24 h-24 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-[#f5f7f2] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md rounded-3xl bg-white p-10 shadow-xl border border-green-100 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100">
+            <svg className="h-10 w-10 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Enlace inválido</h2>
-          <p className="text-gray-600 mb-8">El token ha expirado o no es válido.</p>
-          <Link 
+
+          <h2 className="mb-3 text-3xl font-bold text-gray-900">Enlace inválido</h2>
+          <p className="mb-8 text-sm leading-6 text-gray-600">
+            El enlace de recuperación no es válido o ha expirado.
+          </p>
+
+          <Link
             to="/forgot-password"
-            className="w-full block bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 font-semibold shadow-lg"
+            className="block w-full rounded-xl bg-green-700 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-green-800"
           >
             Solicitar nuevo enlace
           </Link>
-          <p className="mt-6 text-sm text-gray-500">
-            <Link to="/login" className="text-blue-600 hover:underline">← Volver al login</Link>
-          </p>
+
+          <Link
+            to="/login"
+            className="mt-4 block text-sm font-medium text-green-700 transition hover:text-green-800 hover:underline"
+          >
+            ← Volver al login
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-12">
-      <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 w-full max-w-md border border-white/50">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="min-h-screen bg-[#f5f7f2] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl border border-green-100">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-green-700 shadow-md">
+            <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.308a1 1 0 01.326-.754l1.435-1.435A6.002 6.002 0 0016 7z" />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-emerald-700 bg-clip-text text-transparent mb-2">
-            Nueva contraseña
-          </h2>
-          <p className="text-gray-600">Ingresa tu nueva contraseña segura</p>
+
+          <h2 className="mb-2 text-3xl font-bold text-gray-900">Nueva contraseña</h2>
+          <p className="text-sm text-gray-600">
+            Introduce tu nueva contraseña para recuperar el acceso.
+          </p>
         </div>
 
-        {/* Mensaje */}
         {message && (
-          <div className={`p-4 rounded-xl text-sm mb-6 ${
-            message.includes('¡Contraseña') 
-              ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
+          <div
+            className={`mb-6 rounded-xl border px-4 py-3 text-sm ${
+              message.includes('¡Contraseña')
+                ? 'border-green-200 bg-green-50 text-green-800'
+                : 'border-red-200 bg-red-50 text-red-800'
+            }`}
+          >
             {message}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña *</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Nueva contraseña *
+            </label>
             <input
               type="password"
               name="password"
@@ -150,12 +157,14 @@ export default function ResetPassword() {
               minLength={8}
               disabled={loading}
               placeholder="Mínimo 8 caracteres"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 shadow-sm"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm text-gray-900 shadow-sm transition focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/20 disabled:opacity-50"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar contraseña *</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Confirmar contraseña *
+            </label>
             <input
               type="password"
               name="confirmPassword"
@@ -165,20 +174,20 @@ export default function ResetPassword() {
               minLength={8}
               disabled={loading}
               placeholder="Repite la contraseña"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 shadow-sm"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm text-gray-900 shadow-sm transition focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/20 disabled:opacity-50"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white py-4 rounded-xl hover:from-emerald-700 hover:to-blue-700 transition-all duration-200 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full rounded-xl bg-green-700 py-4 text-sm font-semibold text-white shadow-md transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path fill="currentColor" d="M12 2.5a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-5 0v-1a2.5 2.5 0 0 1 2.5-2.5z" />
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" className="opacity-25" />
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" className="opacity-90" />
                 </svg>
                 Actualizando...
               </span>
@@ -188,13 +197,19 @@ export default function ResetPassword() {
           </button>
         </form>
 
-        {/* Navegación */}
-        <div className="mt-8 pt-6 border-t border-gray-100 text-center text-sm text-gray-500 space-y-2">
-          <Link to="/login" className="block text-emerald-600 hover:text-emerald-700 hover:underline transition-colors py-2 font-medium">
+        <div className="mt-8 space-y-2 border-t border-gray-100 pt-6 text-center text-sm">
+          <Link
+            to="/login"
+            className="block font-medium text-green-700 transition hover:text-green-800 hover:underline"
+          >
             ← Volver al login
           </Link>
-          <Link to="/forgot-password" className="block text-gray-500 hover:text-gray-700 hover:underline transition-colors py-2">
-            Nuevo enlace de recuperación
+
+          <Link
+            to="/forgot-password"
+            className="block text-gray-500 transition hover:text-gray-700 hover:underline"
+          >
+            Solicitar un nuevo enlace
           </Link>
         </div>
       </div>
