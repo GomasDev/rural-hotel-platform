@@ -1,6 +1,6 @@
 // entities/booking.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { Room } from './room.entity';
+import { Room } from '../../rooms/entities/room.entity';
 import { User } from '../../users/entities/user.entity';
 
 export enum BookingStatus {

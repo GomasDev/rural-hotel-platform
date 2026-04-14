@@ -13,7 +13,7 @@ export declare class AuthController {
             email: string;
             name: string;
             last_name1: string;
-            last_name2: string;
+            last_name2: string | undefined;
         };
     }>;
     login(loginDto: LoginDto): Promise<{

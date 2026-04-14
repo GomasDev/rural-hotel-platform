@@ -7,7 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 
-// ✅ Sin @UseGuards en la clase — cada método gestiona su propio acceso
+// Sin @UseGuards en la clase — cada método gestiona su propio acceso
 @Controller('hotels')
 export class HotelsController {
   constructor(private readonly hotelsService: HotelsService) {}

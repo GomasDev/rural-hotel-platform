@@ -1,8 +1,10 @@
 import { IsEnum } from 'class-validator';
-import { BookingStatus } from '../entities/reservation.entity';
+import { BookingStatus } from '../../bookings/entities/booking.entity';
+import { Column } from 'typeorm/decorator/columns/Column.js';
 
 export class UpdateBookingStatusDto {
 
   @IsEnum(BookingStatus)
-  status: BookingStatus;
+  @Column({ type: 'enum', enum: BookingStatus, default: BookingStatus.Pending })
+  status!: BookingStatus;
 }

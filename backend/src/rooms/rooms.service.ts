@@ -4,7 +4,7 @@ import { Repository, Brackets } from 'typeorm';
 import { Room } from './entities/room.entity';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room-dto';
-import { Booking, BookingStatus } from './entities/reservation.entity';
+import { Booking, BookingStatus } from '../bookings/entities/booking.entity';
 import { AvailableRoomDto } from './dto/available-room.dto';
 
 @Injectable()

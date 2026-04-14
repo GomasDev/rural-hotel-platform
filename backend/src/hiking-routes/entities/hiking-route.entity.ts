@@ -13,32 +13,32 @@ export enum Difficulty {
 @Entity('hiking_routes')
 export class HikingRoute {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'hotel_id' })
-  hotelId: string;
+  hotelId!: string;
 
   @ManyToOne(() => Hotel, { onDelete: 'CASCADE', eager: false })
   @JoinColumn({ name: 'hotel_id' })
-  hotel: Hotel;
+  hotel!: Hotel;
 
   @Column({ type: 'varchar', length: 150 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string | null;
+  description?: string | null;
 
   @Column({ type: 'enum', enum: Difficulty })
-  difficulty: Difficulty;
+  difficulty!: Difficulty;
 
   @Column({ name: 'distance_km', type: 'decimal', precision: 6, scale: 2 })
-  distanceKm: number;
+  distanceKm!: number;
 
   @Column({ name: 'elevation_gain_m', type: 'int', nullable: true })
-  elevationGainM: number | null;
+  elevationGainM?: number | null;
 
   @Column({ name: 'duration_minutes', type: 'int', nullable: true })
-  durationMinutes: number | null;
+  durationMinutes?: number | null;
 
   // ✅ string, NO object
   @Column({
@@ -48,20 +48,20 @@ export class HikingRoute {
     srid: 4326,
     nullable: false,
   })
-  routeGeom: string;
+  routeGeom!: string;
 
   @Column({ name: 'gpx_file_url', type: 'varchar', length: 255, nullable: true })
-  gpxFileUrl: string | null;
+  gpxFileUrl?: string | null;
 
   @Column({ type: 'text', array: true, nullable: true, default: '{}' })
-  images: string[] | null;
+  images?: string[] | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

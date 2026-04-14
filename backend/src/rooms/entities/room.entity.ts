@@ -3,7 +3,7 @@ import {
   ManyToOne, JoinColumn, CreateDateColumn, OneToMany
 } from 'typeorm';
 import { Hotel } from '../../hotels/entities/hotel.entity';
-import { Booking } from './reservation.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity('rooms')
 export class Room {

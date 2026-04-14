@@ -8,10 +8,6 @@ import { UpdateRoomDto } from './dto/update-room-dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { use } from 'passport';
-import { Admin, ResumeToken } from 'typeorm';
-import { equal } from 'assert';
-import { request } from 'express';
 import { AvailableRoomDto } from './dto/available-room.dto';
 import { UpdateBookingStatusDto } from './dto/update-reservation-status.dto';
 
@@ -19,7 +15,7 @@ import { UpdateBookingStatusDto } from './dto/update-reservation-status.dto';
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
-  // 🌐 PÚBLICOS
+  //  PÚBLICOS
   @Get()
   findAll() {
     return this.roomsService.findAll();
@@ -49,7 +45,7 @@ export class RoomsController {
     return this.roomsService.findOne(id);
   }
 
-  // 🔒 PROTEGIDOS
+  //  PROTEGIDOS
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('super_admin', 'admin')

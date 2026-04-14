@@ -7,12 +7,12 @@ import { Type } from 'class-transformer';
 
 export class CreateRoomDto {
   @IsUUID()
-  hotelId: string;
+  hotelId!: string;
 
   @IsString()
   @MinLength(2)
   @MaxLength(100)
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
@@ -22,12 +22,12 @@ export class CreateRoomDto {
   @Min(1)
   @Max(20)
   @Type(() => Number)
-  capacity: number;
+  capacity!: number;
 
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @Type(() => Number)
-  pricePerNight: number;
+  pricePerNight!: number;
 
   @IsOptional()
   @IsArray()

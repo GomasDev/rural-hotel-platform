@@ -13,20 +13,20 @@ export enum PriceRange {
 @Entity('restaurants')
 export class Restaurant {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'hotel_id' })
-  hotelId: string;
+  hotelId!: string;
 
   @ManyToOne(() => Hotel, { onDelete: 'CASCADE', eager: false })
   @JoinColumn({ name: 'hotel_id' })
-  hotel: Hotel;
+  hotel!: Hotel;
 
   @Column({ type: 'varchar', length: 150 })
-  name: string;
+  name!: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string | null;
+  description?: string | null;
 
   // ✅ string, NO object — TypeORM recibe/entrega WKT o GeoJSON como string
   @Column({
@@ -35,16 +35,16 @@ export class Restaurant {
     srid: 4326,
     nullable: false,
   })
-  location: string;
+  location!: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  phone: string | null;
+  phone?: string | null;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  website: string | null;
+  website?: string | null;
 
   @Column({ name: 'cuisine_type', type: 'varchar', length: 100, nullable: true })
-  cuisineType: string | null;
+  cuisineType?: string | null;
 
   @Column({
     name: 'price_range',
@@ -52,20 +52,20 @@ export class Restaurant {
     enum: PriceRange,
     nullable: true,
   })
-  priceRange: PriceRange | null;
+  priceRange?: PriceRange | null;
 
   @Column({ type: 'decimal', precision: 2, scale: 1, nullable: true })
-  rating: number | null;
+  rating?: number | null;
 
   @Column({ type: 'text', array: true, nullable: true, default: '{}' })
-  images: string[] | null;
+  images?: string[] | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

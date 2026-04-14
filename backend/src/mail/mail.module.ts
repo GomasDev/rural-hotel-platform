@@ -6,16 +6,16 @@ import { MailService } from './mail.service';
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.EMAIL_SMTP_HOST || 'mailpit',
+        host: process.env.EMAIL_SMTP_HOST,
         port: Number(process.env.EMAIL_SMTP_PORT) || 1025,
-        secure: process.env.EMAIL_SMTP_SECURE === 'true', // ← false para Mailpit
+        secure: process.env.EMAIL_SMTP_SECURE === 'true',
         auth: process.env.EMAIL_SMTP_USER ? {
           user: process.env.EMAIL_SMTP_USER,
           pass: process.env.EMAIL_SMTP_PASSWORD,
         } : undefined,
       },
       defaults: {
-        from: process.env.MAIL_FROM || 'noreply@ruralhot.com',
+        from: process.env.EMAIL_FROM
       },
     }),
   ],

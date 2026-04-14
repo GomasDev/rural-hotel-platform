@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express'; // ✅ añadir
+import { NestExpressApplication } from '@nestjs/platform-express'; 
 import { AppModule } from './app.module';
 import { join } from 'path';
 import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule); // ✅ tipar
+  const app = await NestFactory.create<NestExpressApplication>(AppModule); 
 
   const uploadsDir = join(process.cwd(), 'uploads', 'gpx');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
