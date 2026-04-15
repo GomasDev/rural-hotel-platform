@@ -3,9 +3,9 @@ import {
   UseGuards, Request, HttpCode, HttpStatus, Query, // ← añade Query
 } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
-import { BookingStatsService } from './booking-stats.service'; // ← nuevo import
+import { BookingStatsService } from '../analytics/booking-stats.service'; // ← nuevo import
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { BookingStatsQueryDto } from './dto/booking-stats-query.dto'; // ← nuevo import
+import { BookingStatsQueryDto } from '../analytics/dto/booking-stats-query.dto'; // ← nuevo import
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 

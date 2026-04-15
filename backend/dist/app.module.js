@@ -52,7 +52,7 @@ exports.AppModule = AppModule = __decorate([
             restaurants_module_1.RestaurantsModule,
             hiking_routes_module_1.HikingRoutesModule,
             bookings_module_1.BookingsModule,
-            activities_module_1.ActivitiesModule],
+            activities_module_1.ActivitiesModule,],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

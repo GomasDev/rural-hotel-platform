@@ -1,4 +1,4 @@
-# 🏔️ RuralHot - Plataforma de Gestión Hotelera Rural + Senderismo
+# RuralHot - Plataforma de Gestión Hotelera Rural + Senderismo
 
 **TFG DAW - Rafael Ballesteros Padial** | *Mayo 2026*
 
@@ -14,33 +14,33 @@ Stack principal: `NestJS + React + PostGIS`.
 
 ---
 
-## 🚀 Características
+## Características
 
-- 🏨 Gestión hotelera:
+- Gestión hotelera:
   - hoteles, habitaciones, categorías, ocupación
   - reservas (check-in/check-out)
   - prevención de overbooking
   - calendarios y estados
-- 🧾 Gestión de clientes y usuarios:
+- Gestión de clientes y usuarios:
   - roles `super_admin`, `admin_hotel`, `cliente`
   - RBAC / permisos por rol
-- 🥾 Turismo activo:
+- Turismo activo:
   - rutas de senderismo basadas en PostGIS
   - geolocalización de actividades y puntos de interés
   - búsqueda por proximidad
-- 💳 Motor de reservas:
+- Motor de reservas:
   - reservas directas (sin OTAs)
   - pago Stripe (planeado, sandbox)
-- 📊 Frontend SPA:
+- Frontend SPA:
   - panel admin + panel cliente
   - UI responsive con TailwindCSS
-- 🗺️ Mapas:
+- Mapas:
   - Leaflet + OpenStreetMap
   - visualización de rutas y alojamientos
 
 ---
 
-## 🏗️ Stack Tecnológico
+## Stack Tecnológico
 
 - Frontend: React 18 + TypeScript 5.6 + TailwindCSS
 - Backend: NestJS 11 + TypeScript 5.6 + TypeORM
@@ -51,7 +51,7 @@ Stack principal: `NestJS + React + PostGIS`.
 
 ---
 
-## 🧩 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```
 rural-hotel-platform/
@@ -79,7 +79,7 @@ rural-hotel-platform/
 
 ---
 
-## ⚙️ Instalación y ejecución local
+## Instalación y ejecución local
 
 ```bash
 git clone https://github.com/GomasDev/rural-hotel-platform.git
@@ -105,7 +105,7 @@ npm run start:dev
 
 ---
 
-## 🧪 Pruebas
+## Pruebas
 
 - Backend: `npm run test` (desde `backend/`)
 - e2e: `npm run test:e2e` (desde `backend/`)
@@ -113,7 +113,7 @@ npm run start:dev
 
 ---
 
-## 📌 Notas de desarrollo
+## Notas de desarrollo
 
 - Asegúrate de tener Docker/Docker Compose instalados.
 - Para desarrollo local, `POSTGRES_HOST=host.docker.internal` o usar red Docker.
@@ -122,7 +122,7 @@ npm run start:dev
 
 ---
 
-## 📁 Próximas mejoras
+## Próximas mejoras
 
 - Autorización completa con guards por recurso.
 - Clientes con historial de facturas y estado de pago.
@@ -132,13 +132,13 @@ npm run start:dev
 
 ---
 
-## 📝 Licencia
+## Licencia
 
 - MIT (ver `LICENSE`)
 
 ---
 
-## 🤝 Contacto
+## Contacto
 
 - GitHub: `https://github.com/GomasDev/rural-hotel-platform`
 - Autor: Rafael Ballesteros Padial

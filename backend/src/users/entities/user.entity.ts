@@ -35,4 +35,7 @@ export class User {
   @Column({ name: 'reset_password_expires', type: 'timestamp', nullable: true, default: null })
   resetPasswordExpires!: Date | null;
 
+  @Column({ name: 'deleted_at', type: 'timestamp', nullable: true, default: null })
+  deletedAt!: Date | null;
+
 }

@@ -40,7 +40,7 @@ import { ActivitiesModule } from './activities/activities.module';
   RestaurantsModule,
   HikingRoutesModule,
   BookingsModule,
-  ActivitiesModule
+  ActivitiesModule,
 ],
   controllers: [AppController],
   providers: [AppService],

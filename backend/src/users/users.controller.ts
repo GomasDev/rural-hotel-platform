@@ -11,13 +11,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  @Roles('superadmin' as UserRole)
+  @Roles('super_admin' as UserRole)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Patch(':id/role')
-  @Roles('superadmin' as UserRole)
+  @Roles('super_admin' as UserRole)
   updateRole(
     @Param('id') id: string,
     @Body('role') role: string,
@@ -26,7 +26,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles('superadmin' as UserRole)
+  @Roles('super_admin' as UserRole)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

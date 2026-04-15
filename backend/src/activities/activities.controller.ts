@@ -13,6 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class ActivitiesController {
   constructor(private readonly service: ActivitiesService) {}
 
+    //PÚBLICOS — sin token
   @Get()
   findAll(@Param('hotelId') hotelId: string) {
     return this.service.findAllByHotel(hotelId);
@@ -23,6 +24,7 @@ export class ActivitiesController {
     return this.service.findOne(id);
   }
 
+  //PROTEGIDOS — requieren token y rol
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'super_admin')

@@ -4,7 +4,7 @@ import { Booking } from './entities/booking.entity';
 import { Room }    from '../rooms/entities/room.entity';
 import { BookingsService }    from './bookings.service';
 import { BookingsController } from './bookings.controller';
-import { BookingStatsService } from './booking-stats.service';
+import { BookingStatsService } from '../analytics/booking-stats.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Booking, Room])],
