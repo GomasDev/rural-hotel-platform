@@ -24,6 +24,7 @@ import DashboardLayout from './components/layouts/DashboardLayout'
 import { AuthProvider } from './context/AuthContext'
 
 import './App.css'
+import Analytics from './pages/dashboard/Analytics'
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
             <Route path="hiking-routes" element={<HikingRoutes />} />
             <Route path="activities"   element={<Activities />} />
             <Route path="users"        element={<Users />} />
+            <Route path="analytics"    element={<Analytics />} />
           </Route>
         </Routes>
       </BrowserRouter>

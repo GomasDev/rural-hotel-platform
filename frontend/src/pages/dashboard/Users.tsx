@@ -7,11 +7,11 @@ interface User {
   lastName1: string;
   lastName2?: string;
   email: string;
-  role: 'superadmin' | 'admin' | 'client';
+  role: 'super_admin' | 'admin' | 'client';
 }
 
 const ROLE_LABEL: Record<string, string> = {
-  superadmin: 'Superadmin',
+  super_admin: 'Superadmin',
   admin:      'Admin',
   client:     'Cliente',
 };
@@ -166,7 +166,7 @@ export default function Users() {
 
   const stats = {
     total:      users.length,
-    superadmin: users.filter(u => u.role === 'superadmin').length,
+    superadmin: users.filter(u => u.role === 'super_admin').length,
     admin:      users.filter(u => u.role === 'admin').length,
     client:     users.filter(u => u.role === 'client').length,
   };
@@ -307,7 +307,6 @@ export default function Users() {
                               onChange={e => handleRoleChange(u.id, e.target.value)}
                               className={`text-xs font-semibold px-2.5 py-1 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500/30 ${ROLE_COLOR[u.role]}`}
                             >
-                              <option value="superadmin">Superadmin</option>
                               <option value="admin">Admin</option>
                               <option value="client">Cliente</option>
                             </select>

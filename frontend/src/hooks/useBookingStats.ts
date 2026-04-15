@@ -61,7 +61,7 @@ export function useBookingStats(filters: BookingStatsFilters) {
           params.set('hotelId', filters.hotelId);
         }
 
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('access_token');
 
         const res = await fetch(`${API_URL}/bookings/stats?${params.toString()}`, {
           signal: controller.signal,

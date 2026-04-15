@@ -196,9 +196,9 @@ export default function Dashboard() {
     { icon: '❤️', title: 'Favoritos',    desc: 'Tus alojamientos guardados', color: 'from-rose-50 to-pink-100',      border: 'border-rose-100',  to: '/dashboard/hotels'       },
   ];
   const superCards = [
-    { icon: '👥', title: 'Usuarios',          desc: 'Gestión de todos los usuarios',    color: 'from-purple-50 to-violet-100', border: 'border-purple-100', to: '/dashboard/users'  },
-    { icon: '🏨', title: 'Todos los hoteles', desc: 'Supervisión de alojamientos',      color: 'from-green-50 to-emerald-100', border: 'border-green-100',  to: '/dashboard/hotels' },
-    { icon: '📊', title: 'Analytics',         desc: 'Métricas y estadísticas globales', color: 'from-orange-50 to-amber-100',  border: 'border-orange-100', to: '/dashboard'        },
+    { icon: '👥', title: 'Usuarios',          desc: 'Gestión de todos los usuarios',    color: 'from-purple-50 to-violet-100', border: 'border-purple-100', to: '/dashboard/users'      },
+    { icon: '🏨', title: 'Todos los hoteles', desc: 'Supervisión de alojamientos',      color: 'from-green-50 to-emerald-100', border: 'border-green-100',  to: '/dashboard/hotels'     },
+    { icon: '📊', title: 'Analytics',         desc: 'Métricas y estadísticas globales', color: 'from-orange-50 to-amber-100',  border: 'border-orange-100', to: '/dashboard/analytics' },
   ];
   const cards = isSuperadmin ? superCards : isAdmin ? adminCards : clientCards;
 
