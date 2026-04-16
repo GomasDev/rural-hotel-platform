@@ -1,8 +1,10 @@
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import { Booking } from '../bookings/entities/booking.entity';
 export declare class UsersService {
     private usersRepository;
-    constructor(usersRepository: Repository<User>);
+    private bookingRepository;
+    constructor(usersRepository: Repository<User>, bookingRepository: Repository<Booking>);
     findByEmail(email: string): Promise<User | null>;
     create(userData: Partial<User>): Promise<User>;
     findAll(): Promise<User[]>;

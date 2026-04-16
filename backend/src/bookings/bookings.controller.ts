@@ -36,6 +36,10 @@ export class BookingsController {
     return this.statsService.getStats(hotelId, dto);
   }
 
+  @Get('all')          // ← aquí, antes de :id
+  findAll(@Request() req: any) {
+    return this.bookingsService.findAll(req.user.userId, req.user.role);
+  }
 
   @Get('room/:roomId')
   findByRoom(@Param('roomId') roomId: string, @Request() req: any) {

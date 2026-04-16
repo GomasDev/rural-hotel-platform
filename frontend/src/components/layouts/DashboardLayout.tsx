@@ -6,9 +6,13 @@ type MenuItem = { icon: string; name: string; path: string };
 
 const MENU_SUPER: MenuItem[] = [
   { icon: '🏠', name: 'Inicio',          path: '/dashboard'         },
-  { icon: '📊', name: 'Resumen',          path: '/dashboard/analytics'      },
+  { icon: '📊', name: 'Resumen',          path: '/dashboard/analytics'         },
+  { icon: '🏨', name: 'Hoteles',          path: '/dashboard/hotels'        },
+  { icon: '🛏️', name: 'Habitaciones',     path: '/dashboard/rooms'         },
+  { icon: '📅', name: 'Reservas',         path: '/dashboard/reservations'  },
+  { icon: '🥾', name: 'Rutas senderismo', path: '/dashboard/hiking-routes' },
+  { icon: '🎯', name: 'Actividades',      path: '/dashboard/activities'    },
   { icon: '👥', name: 'Usuarios',         path: '/dashboard/users'      },
-  { icon: '🏨', name: 'Todos los hoteles',path: '/dashboard/hotels' },
 ];
 
 const MENU_ADMIN: MenuItem[] = [

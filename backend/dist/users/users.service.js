@@ -17,13 +17,18 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./entities/user.entity");
+const booking_entity_1 = require("../bookings/entities/booking.entity");
 let UsersService = class UsersService {
     usersRepository;
-    constructor(usersRepository) {
+    bookingRepository;
+    constructor(usersRepository, bookingRepository) {
         this.usersRepository = usersRepository;
+        this.bookingRepository = bookingRepository;
     }
     async findByEmail(email) {
-        return this.usersRepository.findOne({ where: { email } });
+        return this.usersRepository.findOne({
+            where: { email, deletedAt: (0, typeorm_2.IsNull)() },
+        });
     }
     async create(userData) {
         const user = this.usersRepository.create(userData);
@@ -31,13 +36,17 @@ let UsersService = class UsersService {
     }
     async findAll() {
         return this.usersRepository.find({
+            where: { deletedAt: (0, typeorm_2.IsNull)() },
             select: ['id', 'name', 'lastName1', 'lastName2', 'email', 'role'],
         });
     }
     async findById(id) {
-        const user = await this.usersRepository.findOne({ where: { id } });
-        if (!user)
+        const user = await this.usersRepository.findOne({
+            where: { id, deletedAt: (0, typeorm_2.IsNull)() },
+        });
+        if (!user) {
             throw new common_1.NotFoundException(`Usuario ${id} no encontrado`);
+        }
         return user;
     }
     async updateRole(id, role) {
@@ -47,8 +56,21 @@ let UsersService = class UsersService {
     }
     async remove(id) {
         const user = await this.findById(id);
-        await this.usersRepository.remove(user);
-        return { message: `Usuario ${id} eliminado correctamente` };
+        await this.bookingRepository
+            .createQueryBuilder()
+            .update(booking_entity_1.Booking)
+            .set({ status: booking_entity_1.BookingStatus.Cancelled })
+            .where('user_id = :id', { id: user.id })
+            .andWhere('status IN (:...statuses)', {
+            statuses: [booking_entity_1.BookingStatus.Pending, booking_entity_1.BookingStatus.Confirmed],
+        })
+            .execute();
+        await this.usersRepository.update(user.id, {
+            deletedAt: new Date(),
+        });
+        return {
+            message: `Usuario ${id} marcado como eliminado correctamente`,
+        };
     }
     async updateResetToken(id, token, expires) {
         await this.usersRepository.update(id, {
@@ -58,7 +80,7 @@ let UsersService = class UsersService {
     }
     async findByResetToken(token) {
         return this.usersRepository.findOne({
-            where: { resetPasswordToken: token },
+            where: { resetPasswordToken: token, deletedAt: (0, typeorm_2.IsNull)() },
         });
     }
     async updatePassword(id, hashedPassword) {
@@ -73,6 +95,8 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(booking_entity_1.Booking)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map
