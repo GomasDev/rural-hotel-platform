@@ -72,5 +72,5 @@ findAll(): Promise<Restaurant[]> {
       )
       .andWhere('r.is_active = true')
       .getMany();
-  }
+   }
 }
